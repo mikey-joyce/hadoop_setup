@@ -4,6 +4,6 @@
 1. `git clone https://github.com/mikey-joyce/hadoop_setup.git`
  
 ## Hadoop Instructions
-1. `. install_hadoop1.sh`
-2. `. install_hadoop2.sh`
-3. `. install_hadoop3.sh`
+1. `. hadoop_setup/install_hadoop1.sh`
+2. `. hadoop_setup/install_hadoop2.sh`
+3. `. hadoop_setup/install_hadoop3.sh`
