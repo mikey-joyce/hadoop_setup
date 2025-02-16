@@ -73,7 +73,7 @@ echo "Formatting HDFS namenode..."
 hdfs namenode -format
 
 echo "Starting HDFS..."
-$HADOOP_HOME/sbin/start-dfs.sh
+yes | $HADOOP_HOME/sbin/start-dfs.sh
 
 echo "Starting YARN..."
 $HADOOP_HOME/sbin/start-yarn.sh
