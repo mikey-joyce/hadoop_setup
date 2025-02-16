@@ -6,5 +6,15 @@
 Note: stay in the parent directory of hadoop_setup during the install process!
  
 ## Hadoop Install Instructions
-1. `. hadoop_setup/install_hadoop1.sh`
-2. `. hadoop_setup/install_hadoop2.sh`
+1. `. hadoop_setup/hadoop1.sh`
+2. `. hadoop_setup/hadoop2.sh`
+
+## Pig Install Instructions
+1. `. hadoop_setup/pig.sh`
+
+To start pig do: `$PIG_HOME/bin/pig`
+
+## HBase Install Instructions
+1. `. hadoop_setup/hbase.sh`
+
+To start hbase do: `$HBASE_HOME/bin/start-hbase.sh`
