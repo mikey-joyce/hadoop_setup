@@ -24,5 +24,12 @@ sudo tee $HBASE_HOME/conf/hbase-site.xml > /dev/null <<EOL
     <name>hbase.rootdir</name>
     <value>hdfs://localhost:9000/hbase</value>
   </property>
+  <property>
+    <name>hbase.wal.provider</name>
+    <value>filesystem</value>
+  </property>
 </configuration>
 EOL
+
+rm hbase-1.2.6-bin.tar.gz
+echo 'HBase install complete'
