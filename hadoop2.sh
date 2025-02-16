@@ -92,6 +92,8 @@ sudo tee $HADOOP_HOME/etc/hadoop/yarn-site.xml > /dev/null <<EOL
 </configuration>
 EOL
 
+rm hadoop-2.8.1.tar.gz
+
 echo "Formatting HDFS namenode..."
 hdfs namenode -format
 
