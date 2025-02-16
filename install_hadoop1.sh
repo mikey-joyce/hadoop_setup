@@ -23,3 +23,5 @@ chmod 640 ~/.ssh/authorized_keys  # Set the correct permissions for security
 
 echo "Testing SSH connection to localhost..."
 ssh -o StrictHostKeyChecking=no localhost  # Skip first-time host key prompt
+
+echo "Part 1 Complete"
