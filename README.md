@@ -4,6 +4,7 @@
 1. `git clone https://github.com/mikey-joyce/hadoop_setup.git`
 
 Note: stay in the parent directory of hadoop_setup during the install process!
+
 i.e. If the structure is like: `/home/ubuntu/hadoop_setup`, when running the following commands run it from `/home/ubuntu/`
  
 ## Hadoop Install Instructions
