@@ -35,4 +35,6 @@ echo "export HADOOP_HOME=\$HADOOP_HOME" >> $HIVE_HOME/conf/hive-env.sh
 # Run schematool to initialize the schema with Derby
 $HIVE_HOME/bin/schematool -dbType derby -initSchema
 
+rm apache-hive-1.2.2-bin.tar.gz
+
 echo 'Hive install complete'
