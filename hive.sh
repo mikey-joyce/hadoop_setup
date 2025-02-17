@@ -7,7 +7,7 @@ wget https://archive.apache.org/dist/hive/hive-1.2.2/apache-hive-1.2.2-bin.tar.g
 tar xvfz apache-hive-1.2.2-bin.tar.gz
 
 # Move the tarball to the hive directory
-mv apache-hive-1.2.2-bin.tar.gz hive
+mv apache-hive-1.2.2-bin hive
 
 # Append the HIVE_HOME export to .bashrc
 echo "export HIVE_HOME=/home/ubuntu/hive" >> ~/.bashrc
