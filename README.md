@@ -20,6 +20,7 @@ To start pig do: `$PIG_HOME/bin/pig`
 1. `. hadoop_setup/hbase.sh`
 
 To start hbase do: `$HBASE_HOME/bin/start-hbase.sh`
+
 To open hbase shell do: `$HBASE_HOME/bin/hbase shell`
 
 ## Hive Install Instructions
