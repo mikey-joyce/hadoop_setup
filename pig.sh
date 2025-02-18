@@ -16,7 +16,7 @@ echo 'export PIG_HOME=/home/ubuntu/pig' >> ~/.bashrc
 # Source the .bashrc to apply changes
 source ~/.bashrc
 
-rm pig-0.16.0-tar.gz
+rm pig-0.16.0.tar.gz
 
 # Start the Hadoop job history server
 $HADOOP_HOME/sbin/mr-jobhistory-daemon.sh start historyserver
