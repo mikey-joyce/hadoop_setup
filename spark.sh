@@ -13,4 +13,6 @@ mv spark-2.2.0-bin-hadoop2.7 spark
 echo 'export SPARK_HOME=/home/ubuntu/spark' >> ~/.bashrc
 source ~/.bashrc
 
+rm spark-2.2.0-bin-hadoop2.7.tgz
+
 echo 'Spark install complete!'
