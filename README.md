@@ -29,6 +29,6 @@ To open hbase shell do: `$HBASE_HOME/bin/hbase shell`
 To start the hive shell do: `$HIVE_HOME/bin/hive`
 
 ## Spark Install Instructions
-1. `. hadoop_setup/shark.sh`
+1. `. hadoop_setup/spark.sh`
 
 To start spark: `$SPARK_HOME/bin/spark-shell`
