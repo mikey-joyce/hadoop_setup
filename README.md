@@ -32,3 +32,6 @@ To start the hive shell do: `$HIVE_HOME/bin/hive`
 1. `. hadoop_setup/spark.sh`
 
 To start spark: `$SPARK_HOME/bin/spark-shell`
+
+## PySpark Install Instructions
+1. `. hadoop_setup/pyspark.sh`

@@ -21,7 +21,9 @@ sudo update-alternatives --install /usr/bin/python python /usr/local/bin/python3
 sudo update-alternatives --set python /usr/local/bin/python3.6
 python --version
 
-python -m pip install pyspark==2.2.1
+python -m ensurepip --user
+
+python -m pip install pyspark==2.2.1 --user
 
 cd ..
 rm Python-3.6.15.tgz
