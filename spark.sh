@@ -15,7 +15,4 @@ source ~/.bashrc
 
 rm spark-2.2.0-bin-hadoop2.7.tgz
 
-echo "Installing pyspark..."
-pip install pyspark==2.2.1
-
 echo 'Spark install complete!'
