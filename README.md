@@ -35,3 +35,5 @@ To start spark: `$SPARK_HOME/bin/spark-shell`
 
 ## PySpark Install Instructions
 1. `. hadoop_setup/pyspark.sh`
+
+To start pyspark: `$SPARK_HOME/bin/pyspark`
