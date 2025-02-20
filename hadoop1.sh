@@ -17,6 +17,15 @@ sudo apt install -y net-tools
 echo "Installing scala..."
 sudo apt install scala
 
+echo "Installing python..."
+sudo apt install python3
+
+echo "Installing pip..."
+sudo apt install python3-pip
+
+echo "Installing pyspark..."
+pip install pyspark
+
 echo "Installing unzip..."
 sudo apt install unzip
 
