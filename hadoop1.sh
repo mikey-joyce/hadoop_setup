@@ -14,6 +14,12 @@ sudo apt install -y ssh
 echo "Installing net-tools..."
 sudo apt install -y net-tools
 
+echo "Installing scala..."
+sudo apt install scala
+
+echo "Installing unzip..."
+sudo apt install unzip
+
 echo "Generating SSH key..."
 ssh-keygen -t rsa -b 4096 -f ~/.ssh/id_rsa -N ""
 
