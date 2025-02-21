@@ -4,6 +4,8 @@ def main():
     conf = SparkConf().setAppName("WordCount").setMaster("local[*]")
     sc = SparkContext(conf=conf)
 
+    sc.setLogLevel("INFO")
+
     log_file = "hdfs://localhost:9000/phase1/log4j.properties"
     sc.addFile(log_file)
 
