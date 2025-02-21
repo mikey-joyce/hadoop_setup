@@ -11,11 +11,11 @@ def main():
     words = text_files.flatMap(lambda line: line.split(" ")).map(lambda word: (word, 1))
     counts = words.reduceByKey(lambda x, y: x + y)
 
+    counts.saveAsTextFile("/phase1/results/spark_wordcount")
+
     results = counts.collect()
     for word, count in results:
         print(f"{word}: {count}")
-
-    results.saveAsTextFile("/phase1/results/spark_wordcount")
 
     sc.stop()
 
