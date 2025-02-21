@@ -2,7 +2,7 @@ from pyspark.sql import SparkSession
 from pyspark.sql.functions import explode, col
 
 def main():
-    spark = SparkSession.builder.appName("Tweet Hashtag Extraction").master("local[*]").getOrCreate()
+    spark = SparkSession.builder.appName("Tweet Hashtag & URL Extraction").master("local[*]").getOrCreate()
 
     df = spark.read.json("/phase1/tweets.json")
     df.createOrReplaceTempView("tweets")
