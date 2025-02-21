@@ -6,9 +6,6 @@ def main():
 
     sc.setLogLevel("INFO")
 
-    log_file = "hdfs://localhost:9000/phase1/log4j.properties"
-    sc.addFile(log_file)
-
     input_files = "/phase1/hashtags_urls/*"
     text_files = sc.textFile(input_files)
     text_files = text_files.filter(lambda x: "_SUCCESS" not in x)
