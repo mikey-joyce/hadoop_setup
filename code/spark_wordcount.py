@@ -4,8 +4,8 @@ def main():
     conf = SparkConf().setAppName("WordCount").setMaster("local[*]")
     sc = SparkContext(conf=conf)
 
-    log4j_properties_file = "/path/to/log4j.properties"
-    sc.addFile(log4j_properties_file)
+    log_file = "/phase1/log4j.properties"
+    sc.addFile(log_file)
 
     input_files = "/phase1/hashtags_urls/*"
     text_files = sc.textFile(input_files)
