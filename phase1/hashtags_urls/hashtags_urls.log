@@ -1,0 +1,214 @@
+25/03/06 21:22:07 INFO spark.SparkContext: Running Spark version 2.2.0
+25/03/06 21:22:08 WARN util.NativeCodeLoader: Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
+25/03/06 21:22:08 INFO spark.SparkContext: Submitted application: Tweet Hashtag & URL Extraction
+25/03/06 21:22:08 INFO spark.SecurityManager: Changing view acls to: ubuntu
+25/03/06 21:22:08 INFO spark.SecurityManager: Changing modify acls to: ubuntu
+25/03/06 21:22:08 INFO spark.SecurityManager: Changing view acls groups to: 
+25/03/06 21:22:08 INFO spark.SecurityManager: Changing modify acls groups to: 
+25/03/06 21:22:08 INFO spark.SecurityManager: SecurityManager: authentication disabled; ui acls disabled; users  with view permissions: Set(ubuntu); groups with view permissions: Set(); users  with modify permissions: Set(ubuntu); groups with modify permissions: Set()
+25/03/06 21:22:08 INFO util.Utils: Successfully started service 'sparkDriver' on port 35511.
+25/03/06 21:22:08 INFO spark.SparkEnv: Registering MapOutputTracker
+25/03/06 21:22:08 INFO spark.SparkEnv: Registering BlockManagerMaster
+25/03/06 21:22:08 INFO storage.BlockManagerMasterEndpoint: Using org.apache.spark.storage.DefaultTopologyMapper for getting topology information
+25/03/06 21:22:08 INFO storage.BlockManagerMasterEndpoint: BlockManagerMasterEndpoint up
+25/03/06 21:22:08 INFO storage.DiskBlockManager: Created local directory at /tmp/blockmgr-10fc8de3-8f99-430a-83f0-48654685b7c1
+25/03/06 21:22:08 INFO memory.MemoryStore: MemoryStore started with capacity 366.3 MB
+25/03/06 21:22:08 INFO spark.SparkEnv: Registering OutputCommitCoordinator
+25/03/06 21:22:08 INFO util.log: Logging initialized @1617ms
+25/03/06 21:22:08 INFO server.Server: jetty-9.3.z-SNAPSHOT
+25/03/06 21:22:08 INFO server.Server: Started @1660ms
+25/03/06 21:22:08 INFO server.AbstractConnector: Started ServerConnector@2d157ec5{HTTP/1.1,[http/1.1]}{0.0.0.0:4040}
+25/03/06 21:22:08 INFO util.Utils: Successfully started service 'SparkUI' on port 4040.
+25/03/06 21:22:08 INFO handler.ContextHandler: Started o.s.j.s.ServletContextHandler@40009dc7{/jobs,null,AVAILABLE,@Spark}
+25/03/06 21:22:08 INFO handler.ContextHandler: Started o.s.j.s.ServletContextHandler@4d7eea15{/jobs/json,null,AVAILABLE,@Spark}
+25/03/06 21:22:08 INFO handler.ContextHandler: Started o.s.j.s.ServletContextHandler@294d44{/jobs/job,null,AVAILABLE,@Spark}
+25/03/06 21:22:08 INFO handler.ContextHandler: Started o.s.j.s.ServletContextHandler@6a0dde86{/jobs/job/json,null,AVAILABLE,@Spark}
+25/03/06 21:22:08 INFO handler.ContextHandler: Started o.s.j.s.ServletContextHandler@5884cafe{/stages,null,AVAILABLE,@Spark}
+25/03/06 21:22:08 INFO handler.ContextHandler: Started o.s.j.s.ServletContextHandler@3d5e61d4{/stages/json,null,AVAILABLE,@Spark}
+25/03/06 21:22:08 INFO handler.ContextHandler: Started o.s.j.s.ServletContextHandler@441f7e8e{/stages/stage,null,AVAILABLE,@Spark}
+25/03/06 21:22:08 INFO handler.ContextHandler: Started o.s.j.s.ServletContextHandler@39c4c74c{/stages/stage/json,null,AVAILABLE,@Spark}
+25/03/06 21:22:08 INFO handler.ContextHandler: Started o.s.j.s.ServletContextHandler@30e0c1a{/stages/pool,null,AVAILABLE,@Spark}
+25/03/06 21:22:08 INFO handler.ContextHandler: Started o.s.j.s.ServletContextHandler@1b68175d{/stages/pool/json,null,AVAILABLE,@Spark}
+25/03/06 21:22:08 INFO handler.ContextHandler: Started o.s.j.s.ServletContextHandler@1211bbc0{/storage,null,AVAILABLE,@Spark}
+25/03/06 21:22:08 INFO handler.ContextHandler: Started o.s.j.s.ServletContextHandler@7ae91f5{/storage/json,null,AVAILABLE,@Spark}
+25/03/06 21:22:08 INFO handler.ContextHandler: Started o.s.j.s.ServletContextHandler@195a7da0{/storage/rdd,null,AVAILABLE,@Spark}
+25/03/06 21:22:08 INFO handler.ContextHandler: Started o.s.j.s.ServletContextHandler@bf0df2f{/storage/rdd/json,null,AVAILABLE,@Spark}
+25/03/06 21:22:08 INFO handler.ContextHandler: Started o.s.j.s.ServletContextHandler@17198473{/environment,null,AVAILABLE,@Spark}
+25/03/06 21:22:08 INFO handler.ContextHandler: Started o.s.j.s.ServletContextHandler@7416b22d{/environment/json,null,AVAILABLE,@Spark}
+25/03/06 21:22:08 INFO handler.ContextHandler: Started o.s.j.s.ServletContextHandler@50c402e3{/executors,null,AVAILABLE,@Spark}
+25/03/06 21:22:08 INFO handler.ContextHandler: Started o.s.j.s.ServletContextHandler@78e5e794{/executors/json,null,AVAILABLE,@Spark}
+25/03/06 21:22:08 INFO handler.ContextHandler: Started o.s.j.s.ServletContextHandler@2a6ec5b5{/executors/threadDump,null,AVAILABLE,@Spark}
+25/03/06 21:22:08 INFO handler.ContextHandler: Started o.s.j.s.ServletContextHandler@598d93a9{/executors/threadDump/json,null,AVAILABLE,@Spark}
+25/03/06 21:22:08 INFO handler.ContextHandler: Started o.s.j.s.ServletContextHandler@37d56183{/static,null,AVAILABLE,@Spark}
+25/03/06 21:22:08 INFO handler.ContextHandler: Started o.s.j.s.ServletContextHandler@44ecb617{/,null,AVAILABLE,@Spark}
+25/03/06 21:22:08 INFO handler.ContextHandler: Started o.s.j.s.ServletContextHandler@60ce4230{/api,null,AVAILABLE,@Spark}
+25/03/06 21:22:08 INFO handler.ContextHandler: Started o.s.j.s.ServletContextHandler@6e953328{/jobs/job/kill,null,AVAILABLE,@Spark}
+25/03/06 21:22:08 INFO handler.ContextHandler: Started o.s.j.s.ServletContextHandler@147a488b{/stages/stage/kill,null,AVAILABLE,@Spark}
+25/03/06 21:22:08 INFO ui.SparkUI: Bound SparkUI to 0.0.0.0, and started at http://10.30.6.110:4040
+25/03/06 21:22:08 INFO spark.SparkContext: Added file file:/home/ubuntu/hadoop_setup/code/extract_hashurl.py at file:/home/ubuntu/hadoop_setup/code/extract_hashurl.py with timestamp 1741296128692
+25/03/06 21:22:08 INFO util.Utils: Copying /home/ubuntu/hadoop_setup/code/extract_hashurl.py to /tmp/spark-c1d0112e-494c-40c9-a0db-e8ba70a0d1de/userFiles-b987e4b0-52fd-4d91-a46b-dd9341c58de5/extract_hashurl.py
+25/03/06 21:22:08 INFO executor.Executor: Starting executor ID driver on host localhost
+25/03/06 21:22:08 INFO util.Utils: Successfully started service 'org.apache.spark.network.netty.NettyBlockTransferService' on port 40737.
+25/03/06 21:22:08 INFO netty.NettyBlockTransferService: Server created on 10.30.6.110:40737
+25/03/06 21:22:08 INFO storage.BlockManager: Using org.apache.spark.storage.RandomBlockReplicationPolicy for block replication policy
+25/03/06 21:22:08 INFO storage.BlockManagerMaster: Registering BlockManager BlockManagerId(driver, 10.30.6.110, 40737, None)
+25/03/06 21:22:08 INFO storage.BlockManagerMasterEndpoint: Registering block manager 10.30.6.110:40737 with 366.3 MB RAM, BlockManagerId(driver, 10.30.6.110, 40737, None)
+25/03/06 21:22:08 INFO storage.BlockManagerMaster: Registered BlockManager BlockManagerId(driver, 10.30.6.110, 40737, None)
+25/03/06 21:22:08 INFO storage.BlockManager: Initialized BlockManager: BlockManagerId(driver, 10.30.6.110, 40737, None)
+25/03/06 21:22:08 INFO handler.ContextHandler: Started o.s.j.s.ServletContextHandler@478b28f9{/metrics/json,null,AVAILABLE,@Spark}
+25/03/06 21:22:08 INFO internal.SharedState: Setting hive.metastore.warehouse.dir ('null') to the value of spark.sql.warehouse.dir ('file:/home/ubuntu/hadoop_setup/code/spark-warehouse/').
+25/03/06 21:22:08 INFO internal.SharedState: Warehouse path is 'file:/home/ubuntu/hadoop_setup/code/spark-warehouse/'.
+25/03/06 21:22:08 INFO handler.ContextHandler: Started o.s.j.s.ServletContextHandler@6984a2e4{/SQL,null,AVAILABLE,@Spark}
+25/03/06 21:22:08 INFO handler.ContextHandler: Started o.s.j.s.ServletContextHandler@3ba68ba1{/SQL/json,null,AVAILABLE,@Spark}
+25/03/06 21:22:08 INFO handler.ContextHandler: Started o.s.j.s.ServletContextHandler@6c4edbdb{/SQL/execution,null,AVAILABLE,@Spark}
+25/03/06 21:22:08 INFO handler.ContextHandler: Started o.s.j.s.ServletContextHandler@77b9ab46{/SQL/execution/json,null,AVAILABLE,@Spark}
+25/03/06 21:22:08 INFO handler.ContextHandler: Started o.s.j.s.ServletContextHandler@1a7d7909{/static/sql,null,AVAILABLE,@Spark}
+25/03/06 21:22:09 INFO state.StateStoreCoordinatorRef: Registered StateStoreCoordinator endpoint
+25/03/06 21:22:11 INFO datasources.FileSourceStrategy: Pruning directories with: 
+25/03/06 21:22:11 INFO datasources.FileSourceStrategy: Post-Scan Filters: 
+25/03/06 21:22:11 INFO datasources.FileSourceStrategy: Output Data Schema: struct<value: string>
+25/03/06 21:22:11 INFO execution.FileSourceScanExec: Pushed Filters: 
+25/03/06 21:22:11 INFO codegen.CodeGenerator: Code generated in 94.197245 ms
+25/03/06 21:22:11 INFO memory.MemoryStore: Block broadcast_0 stored as values in memory (estimated size 277.6 KB, free 366.0 MB)
+25/03/06 21:22:11 INFO memory.MemoryStore: Block broadcast_0_piece0 stored as bytes in memory (estimated size 23.6 KB, free 366.0 MB)
+25/03/06 21:22:11 INFO storage.BlockManagerInfo: Added broadcast_0_piece0 in memory on 10.30.6.110:40737 (size: 23.6 KB, free: 366.3 MB)
+25/03/06 21:22:11 INFO spark.SparkContext: Created broadcast 0 from json at NativeMethodAccessorImpl.java:0
+25/03/06 21:22:11 INFO execution.FileSourceScanExec: Planning scan with bin packing, max size: 134217728 bytes, open cost is considered as scanning 4194304 bytes.
+25/03/06 21:22:11 INFO spark.SparkContext: Starting job: json at NativeMethodAccessorImpl.java:0
+25/03/06 21:22:11 INFO scheduler.DAGScheduler: Got job 0 (json at NativeMethodAccessorImpl.java:0) with 3 output partitions
+25/03/06 21:22:11 INFO scheduler.DAGScheduler: Final stage: ResultStage 0 (json at NativeMethodAccessorImpl.java:0)
+25/03/06 21:22:11 INFO scheduler.DAGScheduler: Parents of final stage: List()
+25/03/06 21:22:11 INFO scheduler.DAGScheduler: Missing parents: List()
+25/03/06 21:22:11 INFO scheduler.DAGScheduler: Submitting ResultStage 0 (MapPartitionsRDD[3] at json at NativeMethodAccessorImpl.java:0), which has no missing parents
+25/03/06 21:22:11 INFO memory.MemoryStore: Block broadcast_1 stored as values in memory (estimated size 9.3 KB, free 366.0 MB)
+25/03/06 21:22:11 INFO memory.MemoryStore: Block broadcast_1_piece0 stored as bytes in memory (estimated size 5.1 KB, free 366.0 MB)
+25/03/06 21:22:11 INFO storage.BlockManagerInfo: Added broadcast_1_piece0 in memory on 10.30.6.110:40737 (size: 5.1 KB, free: 366.3 MB)
+25/03/06 21:22:11 INFO spark.SparkContext: Created broadcast 1 from broadcast at DAGScheduler.scala:1006
+25/03/06 21:22:11 INFO scheduler.DAGScheduler: Submitting 3 missing tasks from ResultStage 0 (MapPartitionsRDD[3] at json at NativeMethodAccessorImpl.java:0) (first 15 tasks are for partitions Vector(0, 1, 2))
+25/03/06 21:22:11 INFO scheduler.TaskSchedulerImpl: Adding task set 0.0 with 3 tasks
+25/03/06 21:22:11 INFO scheduler.TaskSetManager: Starting task 0.0 in stage 0.0 (TID 0, localhost, executor driver, partition 0, ANY, 5277 bytes)
+25/03/06 21:22:11 INFO scheduler.TaskSetManager: Starting task 1.0 in stage 0.0 (TID 1, localhost, executor driver, partition 1, ANY, 5277 bytes)
+25/03/06 21:22:11 INFO executor.Executor: Running task 0.0 in stage 0.0 (TID 0)
+25/03/06 21:22:11 INFO executor.Executor: Fetching file:/home/ubuntu/hadoop_setup/code/extract_hashurl.py with timestamp 1741296128692
+25/03/06 21:22:11 INFO executor.Executor: Running task 1.0 in stage 0.0 (TID 1)
+25/03/06 21:22:11 INFO util.Utils: /home/ubuntu/hadoop_setup/code/extract_hashurl.py has been previously copied to /tmp/spark-c1d0112e-494c-40c9-a0db-e8ba70a0d1de/userFiles-b987e4b0-52fd-4d91-a46b-dd9341c58de5/extract_hashurl.py
+25/03/06 21:22:11 INFO datasources.FileScanRDD: Reading File path: hdfs://localhost:9000/phase1/tweets.json, range: 134217728-268435456, partition values: [empty row]
+25/03/06 21:22:11 INFO datasources.FileScanRDD: Reading File path: hdfs://localhost:9000/phase1/tweets.json, range: 0-134217728, partition values: [empty row]
+25/03/06 21:22:11 INFO codegen.CodeGenerator: Code generated in 12.568839 ms
+25/03/06 21:22:14 INFO executor.Executor: Finished task 1.0 in stage 0.0 (TID 1). 28895 bytes result sent to driver
+25/03/06 21:22:14 INFO scheduler.TaskSetManager: Starting task 2.0 in stage 0.0 (TID 2, localhost, executor driver, partition 2, ANY, 5277 bytes)
+25/03/06 21:22:14 INFO executor.Executor: Running task 2.0 in stage 0.0 (TID 2)
+25/03/06 21:22:14 INFO scheduler.TaskSetManager: Finished task 1.0 in stage 0.0 (TID 1) in 2439 ms on localhost (executor driver) (1/3)
+25/03/06 21:22:14 INFO datasources.FileScanRDD: Reading File path: hdfs://localhost:9000/phase1/tweets.json, range: 268435456-360222648, partition values: [empty row]
+25/03/06 21:22:14 INFO executor.Executor: Finished task 0.0 in stage 0.0 (TID 0). 29306 bytes result sent to driver
+25/03/06 21:22:14 INFO scheduler.TaskSetManager: Finished task 0.0 in stage 0.0 (TID 0) in 2788 ms on localhost (executor driver) (2/3)
+25/03/06 21:22:15 INFO executor.Executor: Finished task 2.0 in stage 0.0 (TID 2). 29153 bytes result sent to driver
+25/03/06 21:22:15 INFO scheduler.TaskSetManager: Finished task 2.0 in stage 0.0 (TID 2) in 870 ms on localhost (executor driver) (3/3)
+25/03/06 21:22:15 INFO scheduler.DAGScheduler: ResultStage 0 (json at NativeMethodAccessorImpl.java:0) finished in 3.311 s
+25/03/06 21:22:15 INFO scheduler.DAGScheduler: Job 0 finished: json at NativeMethodAccessorImpl.java:0, took 3.430944 s
+25/03/06 21:22:15 INFO scheduler.TaskSchedulerImpl: Removed TaskSet 0.0, whose tasks have all completed, from pool 
+25/03/06 21:22:15 WARN util.Utils: Truncated the string representation of a plan since it was too large. This behavior can be adjusted by setting 'spark.debug.maxToStringFields' in SparkEnv.conf.
+25/03/06 21:22:15 INFO execution.SparkSqlParser: Parsing command: tweets
+25/03/06 21:22:15 INFO execution.SparkSqlParser: Parsing command: select explode(entities.hashtags.text) as hashtag from tweets
+25/03/06 21:22:15 INFO execution.SparkSqlParser: Parsing command: select explode(entities.urls.expanded_url) as url from tweets
+25/03/06 21:22:15 INFO datasources.FileSourceStrategy: Pruning directories with: 
+25/03/06 21:22:15 INFO datasources.FileSourceStrategy: Post-Scan Filters: 
+25/03/06 21:22:15 INFO datasources.FileSourceStrategy: Output Data Schema: struct<entities: struct<hashtags: array<struct<indices:array<bigint>,text:string>>, media: array<struct<display_url:string,expanded_url:string,id:bigint,id_str:string,indices:array<bigint>,media_url:string,media_url_https:string,sizes:struct<large:struct<h:bigint,resize:string,w:bigint>,medium:struct<h:bigint,resize:string,w:bigint>,small:struct<h:bigint,resize:string,w:bigint>,thumb:struct<h:bigint,resize:string,w:bigint>>,source_status_id:bigint,source_status_id_str:string,source_user_id:bigint,source_user_id_str:string,type:string,url:string>>, symbols: array<struct<indices:array<bigint>,text:string>>, urls: array<struct<display_url:string,expanded_url:string,indices:array<bigint>,url:string>>, user_mentions: array<struct<id:bigint,id_str:string,indices:array<bigint>,name:string,screen_name:string>> ... 3 more fields>>
+25/03/06 21:22:15 INFO execution.FileSourceScanExec: Pushed Filters: 
+25/03/06 21:22:15 INFO datasources.FileSourceStrategy: Pruning directories with: 
+25/03/06 21:22:15 INFO datasources.FileSourceStrategy: Post-Scan Filters: 
+25/03/06 21:22:15 INFO datasources.FileSourceStrategy: Output Data Schema: struct<entities: struct<hashtags: array<struct<indices:array<bigint>,text:string>>, media: array<struct<display_url:string,expanded_url:string,id:bigint,id_str:string,indices:array<bigint>,media_url:string,media_url_https:string,sizes:struct<large:struct<h:bigint,resize:string,w:bigint>,medium:struct<h:bigint,resize:string,w:bigint>,small:struct<h:bigint,resize:string,w:bigint>,thumb:struct<h:bigint,resize:string,w:bigint>>,source_status_id:bigint,source_status_id_str:string,source_user_id:bigint,source_user_id_str:string,type:string,url:string>>, symbols: array<struct<indices:array<bigint>,text:string>>, urls: array<struct<display_url:string,expanded_url:string,indices:array<bigint>,url:string>>, user_mentions: array<struct<id:bigint,id_str:string,indices:array<bigint>,name:string,screen_name:string>> ... 3 more fields>>
+25/03/06 21:22:15 INFO execution.FileSourceScanExec: Pushed Filters: 
+25/03/06 21:22:15 INFO codegen.CodeGenerator: Code generated in 17.926218 ms
+25/03/06 21:22:15 INFO memory.MemoryStore: Block broadcast_2 stored as values in memory (estimated size 277.6 KB, free 365.7 MB)
+25/03/06 21:22:15 INFO memory.MemoryStore: Block broadcast_2_piece0 stored as bytes in memory (estimated size 23.6 KB, free 365.7 MB)
+25/03/06 21:22:15 INFO storage.BlockManagerInfo: Added broadcast_2_piece0 in memory on 10.30.6.110:40737 (size: 23.6 KB, free: 366.2 MB)
+25/03/06 21:22:15 INFO spark.SparkContext: Created broadcast 2 from javaToPython at NativeMethodAccessorImpl.java:0
+25/03/06 21:22:15 INFO execution.FileSourceScanExec: Planning scan with bin packing, max size: 134217728 bytes, open cost is considered as scanning 4194304 bytes.
+25/03/06 21:22:15 INFO memory.MemoryStore: Block broadcast_3 stored as values in memory (estimated size 277.6 KB, free 365.4 MB)
+25/03/06 21:22:15 INFO memory.MemoryStore: Block broadcast_3_piece0 stored as bytes in memory (estimated size 23.6 KB, free 365.4 MB)
+25/03/06 21:22:15 INFO storage.BlockManagerInfo: Added broadcast_3_piece0 in memory on 10.30.6.110:40737 (size: 23.6 KB, free: 366.2 MB)
+25/03/06 21:22:15 INFO spark.SparkContext: Created broadcast 3 from javaToPython at NativeMethodAccessorImpl.java:0
+25/03/06 21:22:15 INFO execution.FileSourceScanExec: Planning scan with bin packing, max size: 134217728 bytes, open cost is considered as scanning 4194304 bytes.
+25/03/06 21:22:16 INFO output.FileOutputCommitter: File Output Committer Algorithm version is 1
+25/03/06 21:22:16 INFO spark.SparkContext: Starting job: saveAsTextFile at NativeMethodAccessorImpl.java:0
+25/03/06 21:22:16 INFO scheduler.DAGScheduler: Got job 1 (saveAsTextFile at NativeMethodAccessorImpl.java:0) with 6 output partitions
+25/03/06 21:22:16 INFO scheduler.DAGScheduler: Final stage: ResultStage 1 (saveAsTextFile at NativeMethodAccessorImpl.java:0)
+25/03/06 21:22:16 INFO scheduler.DAGScheduler: Parents of final stage: List()
+25/03/06 21:22:16 INFO scheduler.DAGScheduler: Missing parents: List()
+25/03/06 21:22:16 INFO scheduler.DAGScheduler: Submitting ResultStage 1 (MapPartitionsRDD[17] at saveAsTextFile at NativeMethodAccessorImpl.java:0), which has no missing parents
+25/03/06 21:22:16 INFO memory.MemoryStore: Block broadcast_4 stored as values in memory (estimated size 94.2 KB, free 365.3 MB)
+25/03/06 21:22:16 INFO memory.MemoryStore: Block broadcast_4_piece0 stored as bytes in memory (estimated size 35.2 KB, free 365.3 MB)
+25/03/06 21:22:16 INFO storage.BlockManagerInfo: Added broadcast_4_piece0 in memory on 10.30.6.110:40737 (size: 35.2 KB, free: 366.2 MB)
+25/03/06 21:22:16 INFO spark.SparkContext: Created broadcast 4 from broadcast at DAGScheduler.scala:1006
+25/03/06 21:22:16 INFO scheduler.DAGScheduler: Submitting 6 missing tasks from ResultStage 1 (MapPartitionsRDD[17] at saveAsTextFile at NativeMethodAccessorImpl.java:0) (first 15 tasks are for partitions Vector(0, 1, 2, 3, 4, 5))
+25/03/06 21:22:16 INFO scheduler.TaskSchedulerImpl: Adding task set 1.0 with 6 tasks
+25/03/06 21:22:16 INFO scheduler.TaskSetManager: Starting task 0.0 in stage 1.0 (TID 3, localhost, executor driver, partition 0, ANY, 5386 bytes)
+25/03/06 21:22:16 INFO scheduler.TaskSetManager: Starting task 1.0 in stage 1.0 (TID 4, localhost, executor driver, partition 1, ANY, 5386 bytes)
+25/03/06 21:22:16 INFO executor.Executor: Running task 0.0 in stage 1.0 (TID 3)
+25/03/06 21:22:16 INFO executor.Executor: Running task 1.0 in stage 1.0 (TID 4)
+25/03/06 21:22:16 INFO datasources.FileScanRDD: Reading File path: hdfs://localhost:9000/phase1/tweets.json, range: 134217728-268435456, partition values: [empty row]
+25/03/06 21:22:16 INFO datasources.FileScanRDD: Reading File path: hdfs://localhost:9000/phase1/tweets.json, range: 0-134217728, partition values: [empty row]
+25/03/06 21:22:16 INFO codegen.CodeGenerator: Code generated in 128.637327 ms
+25/03/06 21:22:18 INFO output.FileOutputCommitter: File Output Committer Algorithm version is 1
+25/03/06 21:22:18 INFO output.FileOutputCommitter: File Output Committer Algorithm version is 1
+25/03/06 21:22:18 INFO python.PythonRunner: Times: total = 2120, boot = 218, init = 1373, finish = 529
+25/03/06 21:22:18 INFO python.PythonRunner: Times: total = 2156, boot = 216, init = 1229, finish = 711
+25/03/06 21:22:18 INFO output.FileOutputCommitter: Saved output of task 'attempt_20250306212216_0001_m_000000_3' to hdfs://localhost:9000/phase1/hashtags_urls/_temporary/0/task_20250306212216_0001_m_000000
+25/03/06 21:22:18 INFO mapred.SparkHadoopMapRedUtil: attempt_20250306212216_0001_m_000000_3: Committed
+25/03/06 21:22:18 INFO executor.Executor: Finished task 0.0 in stage 1.0 (TID 3). 2721 bytes result sent to driver
+25/03/06 21:22:18 INFO scheduler.TaskSetManager: Starting task 2.0 in stage 1.0 (TID 5, localhost, executor driver, partition 2, ANY, 5386 bytes)
+25/03/06 21:22:18 INFO executor.Executor: Running task 2.0 in stage 1.0 (TID 5)
+25/03/06 21:22:18 INFO scheduler.TaskSetManager: Finished task 0.0 in stage 1.0 (TID 3) in 2398 ms on localhost (executor driver) (1/6)
+25/03/06 21:22:18 INFO datasources.FileScanRDD: Reading File path: hdfs://localhost:9000/phase1/tweets.json, range: 268435456-360222648, partition values: [empty row]
+25/03/06 21:22:18 INFO output.FileOutputCommitter: Saved output of task 'attempt_20250306212216_0001_m_000001_4' to hdfs://localhost:9000/phase1/hashtags_urls/_temporary/0/task_20250306212216_0001_m_000001
+25/03/06 21:22:18 INFO mapred.SparkHadoopMapRedUtil: attempt_20250306212216_0001_m_000001_4: Committed
+25/03/06 21:22:18 INFO executor.Executor: Finished task 1.0 in stage 1.0 (TID 4). 2721 bytes result sent to driver
+25/03/06 21:22:18 INFO scheduler.TaskSetManager: Starting task 3.0 in stage 1.0 (TID 6, localhost, executor driver, partition 3, ANY, 5386 bytes)
+25/03/06 21:22:18 INFO executor.Executor: Running task 3.0 in stage 1.0 (TID 6)
+25/03/06 21:22:18 INFO scheduler.TaskSetManager: Finished task 1.0 in stage 1.0 (TID 4) in 2792 ms on localhost (executor driver) (2/6)
+25/03/06 21:22:18 INFO datasources.FileScanRDD: Reading File path: hdfs://localhost:9000/phase1/tweets.json, range: 0-134217728, partition values: [empty row]
+25/03/06 21:22:18 INFO output.FileOutputCommitter: File Output Committer Algorithm version is 1
+25/03/06 21:22:18 INFO python.PythonRunner: Times: total = 468, boot = -196, init = 501, finish = 163
+25/03/06 21:22:19 INFO output.FileOutputCommitter: Saved output of task 'attempt_20250306212216_0001_m_000002_5' to hdfs://localhost:9000/phase1/hashtags_urls/_temporary/0/task_20250306212216_0001_m_000002
+25/03/06 21:22:19 INFO mapred.SparkHadoopMapRedUtil: attempt_20250306212216_0001_m_000002_5: Committed
+25/03/06 21:22:19 INFO executor.Executor: Finished task 2.0 in stage 1.0 (TID 5). 2678 bytes result sent to driver
+25/03/06 21:22:19 INFO scheduler.TaskSetManager: Starting task 4.0 in stage 1.0 (TID 7, localhost, executor driver, partition 4, ANY, 5386 bytes)
+25/03/06 21:22:19 INFO executor.Executor: Running task 4.0 in stage 1.0 (TID 7)
+25/03/06 21:22:19 INFO scheduler.TaskSetManager: Finished task 2.0 in stage 1.0 (TID 5) in 535 ms on localhost (executor driver) (3/6)
+25/03/06 21:22:19 INFO datasources.FileScanRDD: Reading File path: hdfs://localhost:9000/phase1/tweets.json, range: 134217728-268435456, partition values: [empty row]
+25/03/06 21:22:19 INFO output.FileOutputCommitter: File Output Committer Algorithm version is 1
+25/03/06 21:22:19 INFO output.FileOutputCommitter: File Output Committer Algorithm version is 1
+25/03/06 21:22:19 INFO python.PythonRunner: Times: total = 816, boot = -570, init = 879, finish = 507
+25/03/06 21:22:19 INFO output.FileOutputCommitter: Saved output of task 'attempt_20250306212216_0001_m_000003_6' to hdfs://localhost:9000/phase1/hashtags_urls/_temporary/0/task_20250306212216_0001_m_000003
+25/03/06 21:22:19 INFO mapred.SparkHadoopMapRedUtil: attempt_20250306212216_0001_m_000003_6: Committed
+25/03/06 21:22:19 INFO executor.Executor: Finished task 3.0 in stage 1.0 (TID 6). 2721 bytes result sent to driver
+25/03/06 21:22:19 INFO scheduler.TaskSetManager: Starting task 5.0 in stage 1.0 (TID 8, localhost, executor driver, partition 5, ANY, 5386 bytes)
+25/03/06 21:22:19 INFO scheduler.TaskSetManager: Finished task 3.0 in stage 1.0 (TID 6) in 881 ms on localhost (executor driver) (4/6)
+25/03/06 21:22:19 INFO executor.Executor: Running task 5.0 in stage 1.0 (TID 8)
+25/03/06 21:22:19 INFO datasources.FileScanRDD: Reading File path: hdfs://localhost:9000/phase1/tweets.json, range: 268435456-360222648, partition values: [empty row]
+25/03/06 21:22:19 INFO python.PythonRunner: Times: total = 822, boot = -68, init = 369, finish = 521
+25/03/06 21:22:20 INFO output.FileOutputCommitter: File Output Committer Algorithm version is 1
+25/03/06 21:22:20 INFO python.PythonRunner: Times: total = 481, boot = -39, init = 329, finish = 191
+25/03/06 21:22:20 INFO output.FileOutputCommitter: Saved output of task 'attempt_20250306212216_0001_m_000004_7' to hdfs://localhost:9000/phase1/hashtags_urls/_temporary/0/task_20250306212216_0001_m_000004
+25/03/06 21:22:20 INFO mapred.SparkHadoopMapRedUtil: attempt_20250306212216_0001_m_000004_7: Committed
+25/03/06 21:22:20 INFO executor.Executor: Finished task 4.0 in stage 1.0 (TID 7). 2721 bytes result sent to driver
+25/03/06 21:22:20 INFO scheduler.TaskSetManager: Finished task 4.0 in stage 1.0 (TID 7) in 1266 ms on localhost (executor driver) (5/6)
+25/03/06 21:22:20 INFO output.FileOutputCommitter: Saved output of task 'attempt_20250306212216_0001_m_000005_8' to hdfs://localhost:9000/phase1/hashtags_urls/_temporary/0/task_20250306212216_0001_m_000005
+25/03/06 21:22:20 INFO mapred.SparkHadoopMapRedUtil: attempt_20250306212216_0001_m_000005_8: Committed
+25/03/06 21:22:20 INFO executor.Executor: Finished task 5.0 in stage 1.0 (TID 8). 2721 bytes result sent to driver
+25/03/06 21:22:20 INFO scheduler.TaskSetManager: Finished task 5.0 in stage 1.0 (TID 8) in 948 ms on localhost (executor driver) (6/6)
+25/03/06 21:22:20 INFO scheduler.TaskSchedulerImpl: Removed TaskSet 1.0, whose tasks have all completed, from pool 
+25/03/06 21:22:20 INFO scheduler.DAGScheduler: ResultStage 1 (saveAsTextFile at NativeMethodAccessorImpl.java:0) finished in 4.617 s
+25/03/06 21:22:20 INFO scheduler.DAGScheduler: Job 1 finished: saveAsTextFile at NativeMethodAccessorImpl.java:0, took 4.694113 s
+25/03/06 21:22:20 INFO server.AbstractConnector: Stopped Spark@2d157ec5{HTTP/1.1,[http/1.1]}{0.0.0.0:4040}
+25/03/06 21:22:20 INFO ui.SparkUI: Stopped Spark web UI at http://10.30.6.110:4040
+25/03/06 21:22:20 INFO spark.MapOutputTrackerMasterEndpoint: MapOutputTrackerMasterEndpoint stopped!
+25/03/06 21:22:20 INFO memory.MemoryStore: MemoryStore cleared
+25/03/06 21:22:20 INFO storage.BlockManager: BlockManager stopped
+25/03/06 21:22:20 INFO storage.BlockManagerMaster: BlockManagerMaster stopped
+25/03/06 21:22:20 INFO scheduler.OutputCommitCoordinator$OutputCommitCoordinatorEndpoint: OutputCommitCoordinator stopped!
+25/03/06 21:22:20 INFO spark.SparkContext: Successfully stopped SparkContext
+25/03/06 21:22:21 INFO util.ShutdownHookManager: Shutdown hook called
+25/03/06 21:22:21 INFO util.ShutdownHookManager: Deleting directory /tmp/spark-c1d0112e-494c-40c9-a0db-e8ba70a0d1de/pyspark-762bce71-7071-40c1-a0ec-1ceb4da8cb3b
+25/03/06 21:22:21 INFO util.ShutdownHookManager: Deleting directory /tmp/spark-c1d0112e-494c-40c9-a0db-e8ba70a0d1de
