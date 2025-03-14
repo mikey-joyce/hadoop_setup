@@ -1,22 +1,5 @@
 #!/bin/bash
 
-# Update system packages
-sudo apt update && sudo apt upgrade -y
-
-# Install Java (Hadoop requires Java)
-sudo apt install openjdk-11-jdk -y
-
-sudo apt install -y ssh
-
-sudo apt install -y net-tools
-
-sudo apt install scala
-
-sudo apt install unzip
-
-# Verify Java installation
-java -version
-
 # Download Hadoop 3.3.6
 wget https://downloads.apache.org/hadoop/common/hadoop-3.3.6/hadoop-3.3.6.tar.gz
 
