@@ -18,7 +18,6 @@ sudo apt install unzip
 java -version
 
 # Download Hadoop 3.3.6
-cd /tmp
 wget https://downloads.apache.org/hadoop/common/hadoop-3.3.6/hadoop-3.3.6.tar.gz
 
 # Extract the Hadoop tar.gz file
