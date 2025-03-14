@@ -1,5 +1,5 @@
 sudo apt update
-sudo apt install -y build-essential zlib1g-dev libncurses5-dev libgdbm-dev libnss3-dev libssl-dev libreadline-dev libffi-dev curl
+sudo apt install -y build-essential zlib1g-dev libncurses5-dev libgdbm-dev libnss3-dev libssl-dev libreadline-dev libffi-dev curl bzip2 libbz2-dev
 
 # Download Python 3.6 source
 curl -O https://www.python.org/ftp/python/3.6.15/Python-3.6.15.tgz
@@ -24,6 +24,8 @@ python --version
 python -m ensurepip --user
 
 python -m pip install pyspark==2.2.1 --user
+
+python -m pip install pandas==1.1.5 --user
 
 cd ..
 rm Python-3.6.15.tgz
