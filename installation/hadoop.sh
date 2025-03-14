@@ -22,13 +22,14 @@ cd /tmp
 wget https://downloads.apache.org/hadoop/common/hadoop-3.3.6/hadoop-3.3.6.tar.gz
 
 # Extract the Hadoop tar.gz file
-sudo tar -xzvf hadoop-3.3.6.tar.gz -C /opt
+sudo tar -xzvf hadoop-3.3.6.tar.gz
 
 # Create symbolic links for easy access
-sudo ln -s /opt/hadoop-3.3.6 /opt/hadoop
+# sudo ln -s /opt/hadoop-3.3.6 /opt/hadoop
+mv hadoop-2.8.1 hadoop
 
 # Set up Hadoop environment variables
-echo "export HADOOP_HOME=/opt/hadoop" >> ~/.bashrc
+echo "export HADOOP_HOME=/home/ubuntu/hadoop" >> ~/.bashrc
 echo "export HADOOP_CONF_DIR=$HADOOP_HOME/etc/hadoop" >> ~/.bashrc
 echo "export HADOOP_MAPRED_HOME=$HADOOP_HOME" >> ~/.bashrc
 echo "export HADOOP_YARN_HOME=$HADOOP_HOME" >> ~/.bashrc
@@ -83,4 +84,4 @@ $HADOOP_HOME/sbin/start-yarn.sh
 # Verify Hadoop installation
 hadoop version
 
-rm hadoop-3.3.6.tar.gz
+# rm hadoop-3.3.6.tar.gz
