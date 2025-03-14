@@ -26,7 +26,7 @@ sudo tar -xzvf hadoop-3.3.6.tar.gz
 
 # Create symbolic links for easy access
 # sudo ln -s /opt/hadoop-3.3.6 /opt/hadoop
-mv hadoop-2.8.1 hadoop
+mv hadoop-3.3.6 hadoop
 
 # Set up Hadoop environment variables
 echo "export HADOOP_HOME=/home/ubuntu/hadoop" >> ~/.bashrc
