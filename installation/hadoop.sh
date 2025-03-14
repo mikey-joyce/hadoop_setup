@@ -36,7 +36,6 @@ echo "export HADOOP_COMMON_HOME=$HADOOP_HOME" >> ~/.bashrc
 echo "export HADOOP_HDFS_HOME=$HADOOP_HOME" >> ~/.bashrc
 echo "export PATH=$PATH:$HADOOP_HOME/bin:$HADOOP_HOME/sbin" >> ~/.bashrc
 echo "export JAVA_HOME=/usr/lib/jvm/java-11-openjdk-amd64" >> ~/.bashrc
-echo "export PATH=$JAVA_HOME/bin:$PATH" >> ~/.bashrc
 
 # Reload bashrc to apply the changes
 source ~/.bashrc
@@ -83,4 +82,4 @@ $HADOOP_HOME/sbin/start-yarn.sh
 # Verify Hadoop installation
 hadoop version
 
-# rm hadoop-3.3.6.tar.gz
+rm hadoop-3.3.6.tar.gz
