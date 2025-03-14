@@ -10,6 +10,9 @@ sudo tar -xzvf hadoop-3.3.6.tar.gz
 # sudo ln -s /opt/hadoop-3.3.6 /opt/hadoop
 mv hadoop-3.3.6 hadoop
 
+echo "export JAVA_HOME=$JAVA_HOME_PATH" >> ~/.bashrc
+echo "export PATH=\$JAVA_HOME/bin:\$PATH" >> ~/.bashrc
+
 # Set up Hadoop environment variables
 echo "export HADOOP_HOME=/home/ubuntu/hadoop" >> ~/.bashrc
 echo "export HADOOP_CONF_DIR=$HADOOP_HOME/etc/hadoop" >> ~/.bashrc
