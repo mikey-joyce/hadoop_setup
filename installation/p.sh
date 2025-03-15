@@ -1,10 +1,10 @@
 #!/bin/bash
 
 # Install PySpark
-pip3 install pyspark==3.5.5
+pip install pyspark==3.5.5
 
 # Install Ray 2.5.0
-pip3 install ray[default]==2.5.0
+pip install ray[default]==2.5.0
 
 # Verify PySpark and Ray installations
 python3 -c "import pyspark; print(pyspark.__version__)"
