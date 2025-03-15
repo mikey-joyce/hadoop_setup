@@ -11,3 +11,6 @@
 - **72.csv.zip:** Second half of source data from -> https://www.kaggle.com/datasets/prkhrawsthi/twitter-sentiment-dataset-3-million-labelled-rows
 - **8.zip:** Source data from -> https://www.kaggle.com/datasets/seriousran/appletwittersentimenttexts
 - **9.zip:** Source data from -> https://www.kaggle.com/datasets/abhishek14398/10k-tweets-with-sentiments-dataset
+
+### Scripts
+- to_hdfs.sh --> stashes all of the data files into /phase2/data in hdfs
