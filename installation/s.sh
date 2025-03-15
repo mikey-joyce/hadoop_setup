@@ -18,3 +18,5 @@ source ~/.bashrc
 
 # Verify Spark installation
 $SPARK_HOME/bin/spark-submit --version
+
+rm spark-3.5.5-bin-hadoop3.tgz
