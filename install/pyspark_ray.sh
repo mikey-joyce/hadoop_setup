@@ -9,6 +9,8 @@ pip install pyspark==3.5.5
 # Install Ray 2.5.0
 pip install ray[default]==2.5.0
 
+pip install pandas
+
 # Verify PySpark and Ray installations
 python3 -c "import pyspark; print(pyspark.__version__)"
 python3 -c "import ray; print(ray.__version__)"
