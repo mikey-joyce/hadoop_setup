@@ -22,6 +22,8 @@ echo "export HADOOP_COMMON_HOME=$HADOOP_HOME" >> ~/.bashrc
 echo "export HADOOP_HDFS_HOME=$HADOOP_HOME" >> ~/.bashrc
 echo "export PATH=$PATH:$HADOOP_HOME/bin:$HADOOP_HOME/sbin" >> ~/.bashrc
 echo "export JAVA_HOME=/usr/lib/jvm/java-11-openjdk-amd64" >> ~/.bashrc
+echo "export JAVA_HOME=$JAVA_HOME_PATH" >> "$HADOOP_ENV_FILE"
+echo "export PATH=\$JAVA_HOME/bin:\$PATH" >> "$HADOOP_ENV_FILE"
 
 # Reload bashrc to apply the changes
 source ~/.bashrc
