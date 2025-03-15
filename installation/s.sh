@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Download Spark 3.5.5
-wget https://dlcdn.apache.org/spark/spark-3.5.5/spark-3.5.5-bin-hadoop3.3.tgz
+wget https://dlcdn.apache.org/spark/spark-3.5.5/spark-3.5.5-bin-hadoop3.tgz
 
 # Extract the Spark tar.gz file
 sudo tar -xzvf spark-3.5.5-bin-hadoop3.3.tgz
