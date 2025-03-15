@@ -10,6 +10,7 @@ sudo tar -xzvf hadoop-3.3.6.tar.gz
 # sudo ln -s /opt/hadoop-3.3.6 /opt/hadoop
 mv hadoop-3.3.6 hadoop
 
+JAVA_HOME_PATH="/usr/lib/jvm/java-11-openjdk-amd64"
 echo "export JAVA_HOME=$JAVA_HOME_PATH" >> ~/.bashrc
 echo "export PATH=\$JAVA_HOME/bin:\$PATH" >> ~/.bashrc
 
