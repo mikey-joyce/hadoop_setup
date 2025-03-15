@@ -8,8 +8,8 @@ Note: stay in the parent directory of hadoop_setup during the install process!
 i.e. If the structure is like: `/home/ubuntu/hadoop_setup`, when running the following commands run it from `/home/ubuntu/`
  
 ## Hadoop Install Instructions
-1. `. hadoop_setup/installation/hadoop1.sh`
-2. `. hadoop_setup/installation/hadoop2.sh`
+1. `. hadoop_setup/install/old_install/hadoop1.sh`
+2. `. hadoop_setup/install/old_install/hadoop2.sh`
 
 ## Pig Install Instructions
 1. `. hadoop_setup/installation/pig.sh`
@@ -17,21 +17,21 @@ i.e. If the structure is like: `/home/ubuntu/hadoop_setup`, when running the fol
 To start pig do: `$PIG_HOME/bin/pig`
 
 ## HBase Install Instructions
-1. `. hadoop_setup/installation/hbase.sh`
+1. `. hadoop_setup/install/old_install/hbase.sh`
 
 To start hbase do: `$HBASE_HOME/bin/start-hbase.sh`
 
 To open hbase shell do: `$HBASE_HOME/bin/hbase shell`
 
 ## Hive Install Instructions
-1. `. hadoop_setup/installation/hive.sh`
+1. `. hadoop_setup/install/old_install/hive.sh`
 
 To start the hive shell do: `$HIVE_HOME/bin/hive`
 
 ## Spark Install Instructions
-1. `. hadoop_setup/installation/spark.sh`
+1. `. hadoop_setup/install/old_install/spark.sh`
 
 To start spark: `$SPARK_HOME/bin/spark-shell`
 
 ## PySpark Install Instructions
-1. `. hadoop_setup/installation/pyspark.sh`
+1. `. hadoop_setup/install/old_install/pyspark.sh`
