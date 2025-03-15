@@ -42,11 +42,11 @@ echo '<configuration>
   </property>
   <property>
     <name>dfs.name.dir</name>
-    <value>/opt/hadoop/hdfs/namenode</value>
+    <value>/home/ubuntu/hadoop/hdfs/namenode</value>
   </property>
   <property>
     <name>dfs.data.dir</name>
-    <value>/opt/hadoop/hdfs/datanode</value>
+    <value>/home/ubuntu/hadoop/hdfs/datanode</value>
   </property>
 </configuration>' > $HADOOP_HOME/etc/hadoop/hdfs-site.xml
 
