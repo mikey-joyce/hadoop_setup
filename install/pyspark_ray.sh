@@ -1,10 +1,11 @@
 #!/bin/bash
 sudo apt install python3-pip
 python3 -m pip install --upgrade setuptools pip
-python3 -m pip install --upgrade pip
 
 # Install PySpark
 pip install pyspark==3.5.5
+
+python3 -m pip install --upgrade pip
 
 # Install Ray 2.5.0
 pip install ray[default]==2.5.0
