@@ -1,4 +1,5 @@
 #!/bin/bash
+sudo apt install python3-pip
 
 # Install PySpark
 pip install pyspark==3.5.5
