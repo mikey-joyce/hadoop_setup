@@ -1,6 +1,6 @@
 #!/bin/bash
 sudo apt install python3-pip
-pip install --upgrade setuptools
+python3 -m pip install --upgrade setuptools pip
 python3 -m pip install --upgrade pip
 
 # Install PySpark
