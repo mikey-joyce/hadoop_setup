@@ -4,7 +4,7 @@
 wget https://dlcdn.apache.org/spark/spark-3.5.5/spark-3.5.5-bin-hadoop3.tgz
 
 # Extract the Spark tar.gz file
-sudo tar -xzvf spark-3.5.5-bin-hadoop3.3.tgz
+sudo tar -xzvf spark-3.5.5-bin-hadoop3.tgz
 
 mv spark-3.5.5-bin-hadoop3 spark
 
