@@ -11,6 +11,7 @@ python3 -m pip install --upgrade pip
 pip install ray[default]==2.5.0
 
 pip install pandas
+pip install pyarrow
 
 # Verify PySpark and Ray installations
 python3 -c "import pyspark; print(pyspark.__version__)"
