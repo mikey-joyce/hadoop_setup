@@ -162,15 +162,16 @@ def main():
     key += 1
 
     # deals with tweets.json (the file Dr. Rao gave us)
+    test[test_names[0]] = pandas_dfs[key]['full_text']
 
-    print(train.shape)
-    print(valid_labels.shape)
-    print(valid_none.shape)
-    print(test.shape)
+    print("Train shape: ",train.shape)
+    print("Validation with labels shape: ", valid_labels.shape)
+    print("Validation no labels shape: ", valid_none.shape)
+    print("Test shape: ", test.shape)
 
-    print(paths[key])
-    print(pandas_dfs[key].keys())
-    print(pandas_dfs[key]['full_text'].head())
+    # was used in debugging when building the script
+    # print(paths[key])
+    # print(pandas_dfs[key].keys())
     # print(pandas_dfs[key].head())
 
 def read_file(spark, file_path):
