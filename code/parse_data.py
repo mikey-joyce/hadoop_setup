@@ -175,7 +175,7 @@ def main():
     # print(pandas_dfs[key].keys())
     # print(pandas_dfs[key].head())
 
-    # convert pd dataframes to spark dataframes and save them as RDDs to the hdfs directory
+    # convert pandas dataframes to spark dataframes and save them as RDDs to the hdfs directory
     sdfs = [
         [spark.createDataFrame(train), 'train'],
         [spark.createDataFrame(valid_labels), 'valid_labels'],
