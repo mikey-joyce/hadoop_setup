@@ -177,10 +177,10 @@ def main():
 
     # convert pd dataframes to spark dataframes and save them as RDDs to the hdfs directory
     sdfs = [
-        (spark.createDataFrame(train), 'train'),
-        (spark.createDataFrame(valid_labels), 'valid_labels'),
-        (spark.createDataFrame(valid_none), 'valid_none'),
-        (spark.createDataFrame(test), 'test')
+        [spark.createDataFrame(train), 'train'],
+        [spark.createDataFrame(valid_labels), 'valid_labels'],
+        [spark.createDataFrame(valid_none), 'valid_none'],
+        [spark.createDataFrame(test), 'test']
     ]
 
     for i in range(len(sdfs)):
