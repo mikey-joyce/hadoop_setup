@@ -37,7 +37,7 @@ def main():
     key = 0
     
     # deals with 1_test.csv
-    pandas_dfs[key] = pandas_dfs[key].rename(columns={'Tweets': col_names[0]})
+    pandas_dfs[key] = pandas_dfs[key].rename(columns={'Tweet': col_names[0]})
     valid_none = pd.concat([valid_none, pandas_dfs[key]], ignore_index=True)
     key += 1
 
@@ -163,6 +163,7 @@ def main():
 
     # deals with tweets.json (the file Dr. Rao gave us)
     test[test_names[0]] = pandas_dfs[key]['full_text']
+    test = test.dropna()
 
     print("Train shape: ",train.shape)
     print("Validation with labels shape: ", valid_labels.shape)
