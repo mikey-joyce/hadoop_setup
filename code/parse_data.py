@@ -14,7 +14,7 @@ def main():
     pandas_dfs, paths = [], []
     for file in files:
         path = file.getPath().toString()
-        paths.append(path)
+        paths.append(path)  # used for debugging later
         spark_df = read_file(spark, path)
         if spark_df is not None:
             pandas_dfs.append(spark_df.toPandas())
