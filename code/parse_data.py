@@ -28,13 +28,14 @@ def main():
     col_names = ['content', 'sentiment']
     test_names = ['content']
 
-    split_ratio = 0.8
     train = pd.DataFrame(columns=col_names)
     valid_labels = pd.DataFrame(columns=col_names)
     valid_none = pd.DataFrame(columns=test_names)
     test = pd.DataFrame(columns=test_names)
 
+    split_ratio = 0.8
     key = 0
+    
     # deals with 1_test.csv
     pandas_dfs[key] = pandas_dfs[key].rename(columns={'Tweets': col_names[0]})
     valid_none = pd.concat([valid_none, pandas_dfs[key]], ignore_index=True)
@@ -167,6 +168,7 @@ def main():
 
     print(paths[key])
     print(pandas_dfs[key].keys())
+    print(pandas_dfs[key]['entities'].keys())
     print(pandas_dfs[key].head())
 
 def read_file(spark, file_path):
