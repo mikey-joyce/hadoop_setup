@@ -168,8 +168,8 @@ def main():
 
     print(paths[key])
     print(pandas_dfs[key].keys())
-    print(pandas_dfs[key]['entities'].keys())
-    print(pandas_dfs[key].head())
+    print(pandas_dfs[key]['entities'].head())
+    # print(pandas_dfs[key].head())
 
 def read_file(spark, file_path):
     ext = file_path.split('.')[-1].lower()
