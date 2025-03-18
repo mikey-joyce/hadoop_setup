@@ -169,7 +169,7 @@ def main():
     print("Validation no labels shape: ", valid_none.shape)
     print("Test shape: ", test.shape)
 
-    print(pandas_dfs[1].keys())
+    print(pandas_dfs[0].keys())
 
     # was used in debugging when building the script
     # print(paths[key])
