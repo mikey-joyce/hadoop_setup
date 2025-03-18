@@ -161,6 +161,8 @@ def main():
     valid_labels = pd.concat([valid_labels, v], ignore_index=True)
     key += 1
 
+    # deals with tweets.json (the file Dr. Rao gave us)
+
     print(train.shape)
     print(valid_labels.shape)
     print(valid_none.shape)
@@ -168,15 +170,11 @@ def main():
 
     print(paths[key])
     print(pandas_dfs[key].keys())
-    print(pandas_dfs[key]['entities'].head())
+    print(pandas_dfs[key]['full_text'].head())
     # print(pandas_dfs[key].head())
 
 def read_file(spark, file_path):
     ext = file_path.split('.')[-1].lower()
-
-    print()
-    print(file_path)
-    print()
 
     if ext == 'csv':
         return spark.read.csv(file_path, header=True, inferSchema=True)
