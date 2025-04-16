@@ -207,7 +207,7 @@ def main():
         [train.to_spark(), 'train'],
         [valid_labels.to_spark(), 'valid_labels'],
         [valid_none.to_spark(), 'valid_none'],
-        [pandas_dfs[key]['full_text'].to_spark(), 'test']   # deals with tweets.json (the file Dr. Rao gave us)
+        [test.to_spark(), 'test']
     ]
 
     for sdf, name in sdfs:
