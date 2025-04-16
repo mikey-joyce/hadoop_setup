@@ -178,10 +178,21 @@ def main():
     valid_none = valid_none.dropna()
     test = test.dropna()
 
-    train["UID"] = ps.Series([f"train{i}" for i in range(len(train))])
-    valid_labels["UID"] = ps.Series([f"valid_labels{i}" for i in range(len(valid_labels))])
-    valid_none["UID"] = ps.Series([f"valid_none{i}" for i in range(len(valid_none))])
-    test["UID"] = ps.Series([f"test{i}" for i in range(len(test))])
+    # train["UID"] = ps.Series([f"train{i}" for i in range(len(train))])
+    # valid_labels["UID"] = ps.Series([f"valid_labels{i}" for i in range(len(valid_labels))])
+    # valid_none["UID"] = ps.Series([f"valid_none{i}" for i in range(len(valid_none))])
+    # test["UID"] = ps.Series([f"test{i}" for i in range(len(test))])
+    train = train.reset_index(drop=True)
+    train['UID'] = train.index.map(lambda i: f"train{i}")
+
+    valid_labels = valid_labels.reset_index(drop=True)
+    valid_labels['UID'] = valid_labels.index.map(lambda i: f"valid_labels{i}")
+
+    valid_none = valid_none.reset_index(drop=True)
+    valid_none['UID'] = valid_none.index.map(lambda i: f"valid_none{i}")
+
+    test = test.reset_index(drop=True)
+    test['UID'] = test.index.map(lambda i: f"test{i}")
 
     # print(train.head())
     # time.sleep(6000)
