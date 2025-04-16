@@ -163,7 +163,7 @@ def main():
     valid_labels = ps.concat([valid_labels, v], ignore_index=True)
     key += 1
 
-    print(pandas_dfs[key].head())
+    print(pandas_dfs[key].keys())
     time.sleep(60)
 
     # deals with tweets.json (the file Dr. Rao gave us)
