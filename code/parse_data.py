@@ -162,6 +162,7 @@ def main():
     key += 1
 
     # deals with tweets.json (the file Dr. Rao gave us)
+    pd.set_option("compute.ops_on_diff_frames", True)
     test[test_names[0]] = pandas_dfs[key]['full_text']
     test = test.dropna()
 
