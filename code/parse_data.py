@@ -22,9 +22,9 @@ def main():
             pandas_dfs.append(spark_df.pandas_api())  # returns ps.DataFrame
 
     universal_mapping = {
-            '1': 1,
-            '0': 0,
-            '-1': -1,
+            '1': 2,
+            '0': 1,
+            '-1': 0,
     }
 
     col_names = ['content', 'sentiment']
@@ -45,9 +45,9 @@ def main():
 
     # deals with 1_train.csv
     mapping = {
-            'Positive emotion': 1,
-            'No emotion towards brand or product': 0,
-            'Negative emotion': -1
+            'Positive emotion': 2,
+            'No emotion towards brand or product': 1,
+            'Negative emotion': 0
     }
     temp_cols = ['tweet_text', 'is_there_an_emotion_directed_at_a_brand_or_product']
     pandas_dfs[key] = pandas_dfs[key].drop(columns=['emotion_in_tweet_is_directed_at'])
@@ -55,9 +55,6 @@ def main():
     pandas_dfs[key] = pandas_dfs[key].rename(columns={temp_cols[0]: col_names[0], temp_cols[1]: col_names[1]})
     train = ps.concat([train, pandas_dfs[key]], ignore_index=True)
     key += 1
-
-    print(train.head())
-    time.sleep(60)
 
     # deals with 2.csv
     pandas_dfs[key] = pandas_dfs[key].drop(columns=['textID', 'selected_text'])
@@ -95,9 +92,9 @@ def main():
 
     # deals with 6_test.csv
     mapping = {
-            '0': -1,
-            '1': 1,
-            '2': 0
+            '0': 0,
+            '1': 2,
+            '2': 1
     }
     pandas_dfs[key]['label'] = (pandas_dfs[key]['label'].map(mapping))
     pandas_dfs[key] = pandas_dfs[key].rename(columns={'text': col_names[0], 'label': col_names[1]})
@@ -112,9 +109,9 @@ def main():
 
     # deals with 71.csv
     mapping = {
-            0.0: -1,
-            1.0: 1,
-            2.0: 0
+            0.0: 0,
+            1.0: 2,
+            2.0: 1
     }
     pandas_dfs[key][col_names[1]] = (pandas_dfs[key][col_names[1]].map(mapping))
     pandas_dfs[key][col_names[1]] = pandas_dfs[key][col_names[1]].fillna(0)
@@ -152,8 +149,8 @@ def main():
 
     # deals with 9.csv
     mapping = {
-            'Positive': 1,
-            'Negative': -1
+            'Positive': 2,
+            'Negative': 0
     }
     pandas_dfs[key] = pandas_dfs[key].drop(columns=['polarity', 'subjectivity'])
     pandas_dfs[key] = pandas_dfs[key][pandas_dfs[key]['Sentiment'].isin(['Positive', 'Negative'])]
@@ -180,6 +177,9 @@ def main():
     valid_labels["UID"] = ps.Series([f"valid_labels{i}" for i in range(len(valid_labels))])
     valid_none["UID"] = ps.Series([f"valid_none{i}" for i in range(len(valid_none))])
     test["UID"] = ps.Series([f"test{i}" for i in range(len(test))])
+
+    print(train.head())
+    time.sleep(6000)
 
     # was used in debugging when building the script
     # print(paths[key])
