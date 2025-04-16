@@ -171,6 +171,9 @@ def main():
     test = pandas_dfs[key][['full_text']].rename(columns={'full_text': test_names[0]})
     test = test.dropna(subset=[test_names[0]])
 
+    print(test.keys())
+    time.sleep(60)
+
     print("Train shape: ",train.shape)
     print("Validation with labels shape: ", valid_labels.shape)
     print("Validation no labels shape: ", valid_none.shape)
