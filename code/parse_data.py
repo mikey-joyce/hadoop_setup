@@ -1,5 +1,5 @@
 from pyspark.sql import SparkSession
-import pyspark.pandas as pd
+import pyspark.pandas as ps
 import os
 
 def main():
@@ -29,17 +29,17 @@ def main():
     col_names = ['content', 'sentiment']
     test_names = ['content']
 
-    train = pd.DataFrame(columns=col_names)
-    valid_labels = pd.DataFrame(columns=col_names)
-    valid_none = pd.DataFrame(columns=test_names)
-    test = pd.DataFrame(columns=test_names)
+    train = ps.DataFrame(columns=col_names)
+    valid_labels = ps.DataFrame(columns=col_names)
+    valid_none = ps.DataFrame(columns=test_names)
+    test = ps.DataFrame(columns=test_names)
 
     split_ratio = 0.8
     key = 0
     
     # deals with 1_test.csv
     pandas_dfs[key] = pandas_dfs[key].rename(columns={'Tweet': col_names[0]})
-    valid_none = pd.concat([valid_none, pandas_dfs[key]], ignore_index=True)
+    valid_none = ps.concat([valid_none, pandas_dfs[key]], ignore_index=True)
     key += 1
 
     # deals with 1_train.csv
@@ -52,7 +52,7 @@ def main():
     pandas_dfs[key] = pandas_dfs[key].drop(columns=['emotion_in_tweet_is_directed_at'])
     pandas_dfs[key][temp_cols[1]] = (pandas_dfs[key][temp_cols[1]].map(mapping))
     pandas_dfs[key] = pandas_dfs[key].rename(columns={temp_cols[0]: col_names[0], temp_cols[1]: col_names[1]})
-    train = pd.concat([train, pandas_dfs[key]], ignore_index=True)
+    train = ps.concat([train, pandas_dfs[key]], ignore_index=True)
     key += 1
 
     # deals with 2.csv
@@ -62,8 +62,8 @@ def main():
     split = int(split_ratio * len(pandas_dfs[key]))
     t = pandas_dfs[key].iloc[:split]
     v = pandas_dfs[key].iloc[split:]
-    train = pd.concat([train, t], ignore_index=True)
-    valid_labels = pd.concat([valid_labels, v], ignore_index=True)
+    train = ps.concat([train, t], ignore_index=True)
+    valid_labels = ps.concat([valid_labels, v], ignore_index=True)
     key += 1
 
     # deals with 3.csv
@@ -75,8 +75,8 @@ def main():
     split = int(split_ratio * len(pandas_dfs[key]))
     t = pandas_dfs[key].iloc[:split]
     v = pandas_dfs[key].iloc[split:]
-    train = pd.concat([train, t], ignore_index=True)
-    valid_labels = pd.concat([valid_labels, v], ignore_index=True)
+    train = ps.concat([train, t], ignore_index=True)
+    valid_labels = ps.concat([valid_labels, v], ignore_index=True)
     key += 1
 
     # deals with 4.csv
@@ -85,8 +85,8 @@ def main():
     split = int(split_ratio * len(pandas_dfs[key]))
     t = pandas_dfs[key].iloc[:split]
     v = pandas_dfs[key].iloc[split:]
-    train = pd.concat([train, t], ignore_index=True)
-    valid_labels = pd.concat([valid_labels, v], ignore_index=True)
+    train = ps.concat([train, t], ignore_index=True)
+    valid_labels = ps.concat([valid_labels, v], ignore_index=True)
     key += 1
 
     # deals with 6_test.csv
@@ -97,13 +97,13 @@ def main():
     }
     pandas_dfs[key]['label'] = (pandas_dfs[key]['label'].map(mapping))
     pandas_dfs[key] = pandas_dfs[key].rename(columns={'text': col_names[0], 'label': col_names[1]})
-    valid_labels = pd.concat([valid_labels, pandas_dfs[key]], ignore_index=True)
+    valid_labels = ps.concat([valid_labels, pandas_dfs[key]], ignore_index=True)
     key += 1
 
     # deals with 6_train.csv
     pandas_dfs[key]['label'] = (pandas_dfs[key]['label'].map(mapping))
     pandas_dfs[key] = pandas_dfs[key].rename(columns={'text': col_names[0], 'label': col_names[1]})
-    train = pd.concat([train, pandas_dfs[key]], ignore_index=True)
+    train = ps.concat([train, pandas_dfs[key]], ignore_index=True)
     key += 1
 
     # deals with 71.csv
@@ -119,8 +119,8 @@ def main():
     split = int(split_ratio * len(pandas_dfs[key]))
     t = pandas_dfs[key].iloc[:split]
     v = pandas_dfs[key].iloc[split:]
-    train = pd.concat([train, t], ignore_index=True)
-    valid_labels = pd.concat([valid_labels, v], ignore_index=True)
+    train = ps.concat([train, t], ignore_index=True)
+    valid_labels = ps.concat([valid_labels, v], ignore_index=True)
     key += 1
 
     # deals with 72.csv
@@ -131,8 +131,8 @@ def main():
     split = int(split_ratio * len(pandas_dfs[key]))
     t = pandas_dfs[key].iloc[:split]
     v = pandas_dfs[key].iloc[split:]
-    train = pd.concat([train, t], ignore_index=True)
-    valid_labels = pd.concat([valid_labels, v], ignore_index=True)
+    train = ps.concat([train, t], ignore_index=True)
+    valid_labels = ps.concat([valid_labels, v], ignore_index=True)
     key += 1
 
     # deals with 8.csv
@@ -142,8 +142,8 @@ def main():
     split = int(split_ratio * len(pandas_dfs[key]))
     t = pandas_dfs[key].iloc[:split]
     v = pandas_dfs[key].iloc[split:]
-    train = pd.concat([train, t], ignore_index=True)
-    valid_labels = pd.concat([valid_labels, v], ignore_index=True)
+    train = ps.concat([train, t], ignore_index=True)
+    valid_labels = ps.concat([valid_labels, v], ignore_index=True)
     key += 1
 
     # deals with 9.csv
@@ -158,12 +158,12 @@ def main():
     split = int(split_ratio * len(pandas_dfs[key]))
     t = pandas_dfs[key].iloc[:split]
     v = pandas_dfs[key].iloc[split:]
-    train = pd.concat([train, t], ignore_index=True)
-    valid_labels = pd.concat([valid_labels, v], ignore_index=True)
+    train = ps.concat([train, t], ignore_index=True)
+    valid_labels = ps.concat([valid_labels, v], ignore_index=True)
     key += 1
 
     # deals with tweets.json (the file Dr. Rao gave us)
-    pd.set_option("compute.ops_on_diff_frames", True)
+    ps.set_option("compute.ops_on_diff_frames", True)
     test[test_names[0]] = pandas_dfs[key]['full_text']
     test = test.dropna()
 
@@ -171,6 +171,13 @@ def main():
     print("Validation with labels shape: ", valid_labels.shape)
     print("Validation no labels shape: ", valid_none.shape)
     print("Test shape: ", test.shape)
+
+    train["UID"] = ps.Series([f"train{i}" for i in range(len(train))])
+    valid_labels["UID"] = ps.Series([f"valid_labels{i}" for i in range(len(valid_labels))])
+    valid_none["UID"] = ps.Series([f"valid_none{i}" for i in range(len(valid_none))])
+    test["UID"] = ps.Series([f"test{i}" for i in range(len(test))])
+
+    print(test.head())
 
     # was used in debugging when building the script
     # print(paths[key])
