@@ -195,6 +195,8 @@ def main():
     ]
 
     for sdf, name in sdfs:
+        sdf.show(5)
+        time.sleep(10)
         sdf.rdd.saveAsTextFile(f"{hdfs_save_dir}/{name}/")
 
 def read_file(spark, file_path):
