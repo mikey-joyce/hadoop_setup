@@ -27,10 +27,6 @@ def main():
             '-1': -1,
     }
 
-    print("IS IT EVEN LOADING IN ?")
-    print(pandas_dfs[0].head())
-    time.sleep(60)
-
     col_names = ['content', 'sentiment']
     test_names = ['content']
 
@@ -46,6 +42,9 @@ def main():
     pandas_dfs[key] = pandas_dfs[key].rename(columns={'Tweet': col_names[0]})
     valid_none = ps.concat([valid_none, pandas_dfs[key]], ignore_index=True)
     key += 1
+
+    print(valid_none.head())
+    time.sleep(60)
 
     # deals with 1_train.csv
     mapping = {
