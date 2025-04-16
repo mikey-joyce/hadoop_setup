@@ -13,6 +13,9 @@ pip install ray[default]==2.5.0
 pip install pandas
 pip install pyarrow
 
+# install stuff we need for transformers and other stuffs
+pip install "ray[train,air]" "transformers[torch]" datasets accelerate evaluate numpy scikit-learn
+
 # Verify PySpark and Ray installations
 python3 -c "import pyspark; print(pyspark.__version__)"
 python3 -c "import ray; print(ray.__version__)"
