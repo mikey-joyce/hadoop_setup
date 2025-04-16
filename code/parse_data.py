@@ -166,22 +166,14 @@ def main():
     # deals with tweets.json (the file Dr. Rao gave us)
     temp = pandas_dfs[key][pandas_dfs[key]['lang'] == 'en']     # grab only the tweets that are in english
     test = temp[['full_text']].rename(columns={'full_text': test_names[0]})
-    # test = test.dropna(subset=[test_names[0]])
 
-    print("Train shape: ",train.shape)
-    print("Validation with labels shape: ", valid_labels.shape)
-    print("Validation no labels shape: ", valid_none.shape)
-    print("Test shape: ", test.shape)
-
+    # drop nan values
     train = train.dropna()
     valid_labels = valid_labels.dropna()
     valid_none = valid_none.dropna()
     test = test.dropna()
 
-    # train["UID"] = ps.Series([f"train{i}" for i in range(len(train))])
-    # valid_labels["UID"] = ps.Series([f"valid_labels{i}" for i in range(len(valid_labels))])
-    # valid_none["UID"] = ps.Series([f"valid_none{i}" for i in range(len(valid_none))])
-    # test["UID"] = ps.Series([f"test{i}" for i in range(len(test))])
+    # create unique ids for each dataset
     train = train.reset_index(drop=True)
     train['UID'] = train.index.map(lambda i: f"train{i}")
 
@@ -194,14 +186,6 @@ def main():
     test = test.reset_index(drop=True)
     test['UID'] = test.index.map(lambda i: f"test{i}")
 
-    # print(train.head())
-    # time.sleep(6000)
-
-    # was used in debugging when building the script
-    # print(paths[key])
-    # print(pandas_dfs[key].keys())
-    # print(pandas_dfs[key].head())
-
     # convert pandas dataframes to spark dataframes and save them as RDDs to the hdfs directory
     sdfs = [
         [train.to_spark(), 'train'],
@@ -211,7 +195,7 @@ def main():
     ]
 
     for sdf, name in sdfs:
-        sdf.show(5)
+        sdf.show(5)     # verify that there is actually data in the spark dataframes before saving as rdd
         time.sleep(10)
         sdf.rdd.saveAsTextFile(f"{hdfs_save_dir}/{name}/")
 
