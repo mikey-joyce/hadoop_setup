@@ -14,9 +14,9 @@ i.e. If the structure is like: `/home/ubuntu/hadoop_setup`, when running the fol
 Note: if hdfs does not work after running the second command, re-run it
 
 ## Spark Install Instructions
-1. `. hadoop_setup/installation/spark.sh`
+1. `. hadoop_setup/install/spark.sh`
 
 To start spark: `$SPARK_HOME/bin/spark-shell`
 
 ## PySpark and Ray Install Instructions
-1. `. hadoop_setup/installation/pyspark_ray.sh`
+1. `. hadoop_setup/install/pyspark_ray.sh`
