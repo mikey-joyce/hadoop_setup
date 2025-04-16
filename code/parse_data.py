@@ -14,10 +14,10 @@ def main():
     pandas_dfs, paths = [], []
     for file in files:
         path = file.getPath().toString()
-        paths.append(path)  # used for debugging later
+        paths.append(path)
         spark_df = read_file(spark, path)
         if spark_df is not None:
-            pandas_dfs.append(spark_df.toPandas())
+            pandas_dfs.append(spark_df.pandas_api())  # returns ps.DataFrame
 
     universal_mapping = {
             '1': 1,
@@ -177,15 +177,14 @@ def main():
 
     # convert pandas dataframes to spark dataframes and save them as RDDs to the hdfs directory
     sdfs = [
-        [spark.createDataFrame(train), 'train'],
-        [spark.createDataFrame(valid_labels), 'valid_labels'],
-        [spark.createDataFrame(valid_none), 'valid_none'],
-        [spark.createDataFrame(test), 'test']
+        [train.to_spark(), 'train'],
+        [valid_labels.to_spark(), 'valid_labels'],
+        [valid_none.to_spark(), 'valid_none'],
+        [test.to_spark(), 'test']
     ]
 
-    for i in range(len(sdfs)):
-        sdfs[i][0] = sdfs[i][0].rdd
-        sdfs[i][0].saveAsTextFile(f"{hdfs_directory}/{sdfs[i][1]}/")
+    for sdf, name in sdfs:
+        sdf.rdd.saveAsTextFile(f"{hdfs_directory}/{name}/")
 
 def read_file(spark, file_path):
     ext = file_path.split('.')[-1].lower()
