@@ -178,8 +178,8 @@ def main():
     valid_none["UID"] = ps.Series([f"valid_none{i}" for i in range(len(valid_none))])
     test["UID"] = ps.Series([f"test{i}" for i in range(len(test))])
 
-    print(train.head())
-    time.sleep(6000)
+    # print(train.head())
+    # time.sleep(6000)
 
     # was used in debugging when building the script
     # print(paths[key])
