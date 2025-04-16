@@ -163,6 +163,9 @@ def main():
     valid_labels = ps.concat([valid_labels, v], ignore_index=True)
     key += 1
 
+    print(pandas_dfs[key]['full_text'].head())
+    time.sleep(60)
+
     # deals with tweets.json (the file Dr. Rao gave us)
     ps.set_option("compute.ops_on_diff_frames", True)
     test[test_names[0]] = pandas_dfs[key]['full_text']
