@@ -19,6 +19,15 @@ if [ $? -ne 0 ]; then
     hdfs dfs -mkdir "$hdfs_dir"
 fi
 
+hdfs_dir="/phase2/data/raw/"
+
+# Check to see if hdfs directory exists
+hdfs dfs -test -d "$hdfs_dir"
+if [ $? -ne 0 ]; then
+    echo "${hdfs_dir} does not exist in HDFS. Creating it..."
+    hdfs dfs -mkdir "$hdfs_dir"
+fi
+
 # Unzip all of the zip files in the data directory
 echo 'Unzipping files...'
 for f in "$f_dir"*.zip; do

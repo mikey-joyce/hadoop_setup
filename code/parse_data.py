@@ -5,10 +5,11 @@ import os
 def main():
     spark = SparkSession.builder.appName("ParseData").getOrCreate()
 
-    hdfs_directory = "/phase2/data"
+    hdfs_load_dir = "/phase2/data/raw"
+    hdfs_save_dir = "/phase2/data"
     hadoop_conf = spark.sparkContext._jsc.hadoopConfiguration()
     fs = spark._jvm.org.apache.hadoop.fs.FileSystem.get(hadoop_conf)
-    path = spark._jvm.org.apache.hadoop.fs.Path(hdfs_directory)
+    path = spark._jvm.org.apache.hadoop.fs.Path(hdfs_load_dir)
     files = fs.listStatus(path)
     
     pandas_dfs, paths = [], []
@@ -185,7 +186,7 @@ def main():
     ]
 
     for sdf, name in sdfs:
-        sdf.rdd.saveAsTextFile(f"{hdfs_directory}/{name}/")
+        sdf.rdd.saveAsTextFile(f"{hdfs_save_dir}/{name}/")
 
 def read_file(spark, file_path):
     ext = file_path.split('.')[-1].lower()
