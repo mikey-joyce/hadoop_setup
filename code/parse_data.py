@@ -1,6 +1,5 @@
 from pyspark.sql import SparkSession
 import pyspark.pandas as ps
-import os
 import time
 
 def main():
