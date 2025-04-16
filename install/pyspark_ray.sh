@@ -28,8 +28,9 @@ python3 -c "import ray; print(ray.__version__)"
 echo 'Testing transformers install..'
 python3 -c "import transformers; print(transformers.__version__)"
 
-echo 'Testing top2vec install..'
-python3 -c "from top2vec import top2vec; print(top2vec.__version__)"
+# Apparently top2vec doesn't have a version attribute ???
+# echo 'Testing top2vec install..'
+# python3 -c "from top2vec import top2vec; print(top2vec.__version__)"
 
 # Optional: Set up the PySpark environment for Spark and Hadoop
 echo "export PYSPARK_PYTHON=python3" >> ~/.bashrc
