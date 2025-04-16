@@ -16,9 +16,20 @@ pip install pyarrow
 # install stuff we need for transformers and other stuffs
 pip install "ray[train,air]" "transformers[torch]" datasets accelerate evaluate numpy scikit-learn
 
+pip install top2vec
+
 # Verify PySpark and Ray installations
+echo 'Testing pyspark install..'
 python3 -c "import pyspark; print(pyspark.__version__)"
+
+echo 'Testing ray install..'
 python3 -c "import ray; print(ray.__version__)"
+
+echo 'Testing transformers install..'
+python3 -c "import transformers; print(transformers.__version__)"
+
+echo 'Testing top2vec install..'
+python3 -c "from top2vec import top2vec; print(top2vec.__version__)"
 
 # Optional: Set up the PySpark environment for Spark and Hadoop
 echo "export PYSPARK_PYTHON=python3" >> ~/.bashrc
