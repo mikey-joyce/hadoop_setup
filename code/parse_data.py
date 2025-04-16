@@ -163,13 +163,10 @@ def main():
     valid_labels = ps.concat([valid_labels, v], ignore_index=True)
     key += 1
 
-    filtered_df = pandas_dfs[key][pandas_dfs[key]['lang'] == 'en']
-    print(filtered_df['full_text'].head())
-    time.sleep(60)
-
     # deals with tweets.json (the file Dr. Rao gave us)
-    test = pandas_dfs[key][['full_text']].rename(columns={'full_text': test_names[0]})
-    test = test.dropna(subset=[test_names[0]])
+    temp = pandas_dfs[key][pandas_dfs[key]['lang'] == 'en']     # grab only the tweets that are in english
+    test = temp[['full_text']].rename(columns={'full_text': test_names[0]})
+    # test = test.dropna(subset=[test_names[0]])
 
     print(test.head())
     time.sleep(60)
@@ -178,6 +175,11 @@ def main():
     print("Validation with labels shape: ", valid_labels.shape)
     print("Validation no labels shape: ", valid_none.shape)
     print("Test shape: ", test.shape)
+
+    train = train.dropna()
+    valid_labels = valid_labels.dropna()
+    valid_none = valid_none.dropna()
+    test = test.dropna()
 
     train["UID"] = ps.Series([f"train{i}" for i in range(len(train))])
     valid_labels["UID"] = ps.Series([f"valid_labels{i}" for i in range(len(valid_labels))])
