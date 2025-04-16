@@ -56,6 +56,9 @@ def main():
     train = ps.concat([train, pandas_dfs[key]], ignore_index=True)
     key += 1
 
+    print(train.head())
+    time.sleep(60)
+
     # deals with 2.csv
     pandas_dfs[key] = pandas_dfs[key].drop(columns=['textID', 'selected_text'])
     pandas_dfs[key] = pandas_dfs[key].rename(columns={'text': 'content'})
@@ -177,9 +180,6 @@ def main():
     valid_labels["UID"] = ps.Series([f"valid_labels{i}" for i in range(len(valid_labels))])
     valid_none["UID"] = ps.Series([f"valid_none{i}" for i in range(len(valid_none))])
     test["UID"] = ps.Series([f"test{i}" for i in range(len(test))])
-
-    print(valid_none.head())
-    time.sleep(60)
 
     # was used in debugging when building the script
     # print(paths[key])
