@@ -163,7 +163,7 @@ def main():
     valid_labels = ps.concat([valid_labels, v], ignore_index=True)
     key += 1
 
-    print(pandas_dfs[key]['full_text'].head())
+    print(pandas_dfs[key].head())
     time.sleep(60)
 
     # deals with tweets.json (the file Dr. Rao gave us)
@@ -194,7 +194,7 @@ def main():
         [train.to_spark(), 'train'],
         [valid_labels.to_spark(), 'valid_labels'],
         [valid_none.to_spark(), 'valid_none'],
-        [test.to_spark(), 'test']
+        [pandas_dfs[key]['full_text'].to_spark(), 'test']   # deals with tweets.json (the file Dr. Rao gave us)
     ]
 
     for sdf, name in sdfs:
