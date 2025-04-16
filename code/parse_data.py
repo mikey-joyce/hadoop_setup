@@ -27,6 +27,10 @@ def main():
             '-1': -1,
     }
 
+    print("IS IT EVEN LOADING IN ?")
+    print(pandas_dfs[0].head())
+    time.sleep(60)
+
     col_names = ['content', 'sentiment']
     test_names = ['content']
 
