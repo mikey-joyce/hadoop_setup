@@ -1,12 +1,21 @@
 #!/bin/bash
 
 f_dir="$HOME/hadoop_setup/data/"
+hdfs_dir="/phase2/"
+
+# Check to see if hdfs directory exists
+hdfs dfs -test -d "$hdfs_dir"
+if [ $? -ne 0 ]; then
+    echo "${hdfs_dir} does not exist in HDFS. Creating it..."
+    hdfs dfs -mkdir "$hdfs_dir"
+fi
+
 hdfs_dir="/phase2/data/"
 
 # Check to see if hdfs directory exists
 hdfs dfs -test -d "$hdfs_dir"
 if [ $? -ne 0 ]; then
-    echo "HDFS directory does not exist. Creating it..."
+    echo "${hdfs_dir} does not exist in HDFS. Creating it..."
     hdfs dfs -mkdir "$hdfs_dir"
 fi
 
