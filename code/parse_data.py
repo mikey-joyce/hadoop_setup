@@ -173,13 +173,13 @@ def main():
     print("Validation no labels shape: ", valid_none.shape)
     print("Test shape: ", test.shape)
 
-    print(valid_none.head())
-    time.sleep(60)
-
     train["UID"] = ps.Series([f"train{i}" for i in range(len(train))])
     valid_labels["UID"] = ps.Series([f"valid_labels{i}" for i in range(len(valid_labels))])
     valid_none["UID"] = ps.Series([f"valid_none{i}" for i in range(len(valid_none))])
     test["UID"] = ps.Series([f"test{i}" for i in range(len(test))])
+
+    print(valid_none.head())
+    time.sleep(60)
 
     # was used in debugging when building the script
     # print(paths[key])
