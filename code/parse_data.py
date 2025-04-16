@@ -163,11 +163,11 @@ def main():
     valid_labels = ps.concat([valid_labels, v], ignore_index=True)
     key += 1
 
-    print(pandas_dfs[key]['lang'].head())
+    filtered_df = pandas_dfs[key][pandas_dfs[key]['lang'] == 'en']
+    print(filtered_df['full_text'].head())
     time.sleep(60)
 
     # deals with tweets.json (the file Dr. Rao gave us)
-    # ps.set_option("compute.ops_on_diff_frames", True)
     test = pandas_dfs[key][['full_text']].rename(columns={'full_text': test_names[0]})
     test = test.dropna(subset=[test_names[0]])
 
