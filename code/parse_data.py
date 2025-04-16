@@ -1,6 +1,7 @@
 from pyspark.sql import SparkSession
 import pyspark.pandas as ps
 import os
+import time
 
 def main():
     spark = SparkSession.builder.appName("ParseData").getOrCreate()
@@ -178,6 +179,7 @@ def main():
     test["UID"] = ps.Series([f"test{i}" for i in range(len(test))])
 
     print(test.head())
+    time.sleep(60)
 
     # was used in debugging when building the script
     # print(paths[key])
