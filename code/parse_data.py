@@ -2,18 +2,20 @@ from pyspark.sql import SparkSession
 import pyspark.pandas as ps
 import time
 from top2vec import top2vec
+import numpy as np
 
-def find_topics(data: list[str]):
+def find_topics(data: list[str]) -> np.ndarray:
+    """Returns an np.ndarray of shape (data, num_topics)"""
     documents = data
     
     try:
         model = Top2Vec(documents, ngram=True, contextual_top2vec=True)
     except Exception as e:
         print("Couldn't create top2vec model.", e)
-    
-    topic_words, word_scores, topic_nums = model.get_topics()
-    
-    return topic_words, word_scores, topic_nums
+        return np.array([])
+
+    topic_distributions: np.ndarray  = model.get_document_topic_distribution()
+    return topic_distributions
 
 def main():
     spark = SparkSession.builder.appName("ParseData").getOrCreate()
@@ -184,6 +186,10 @@ def main():
     valid_labels = valid_labels.dropna()
     valid_none = valid_none.dropna()
     test = test.dropna()
+    
+    # Use top2vec
+    train_topics = find_topics(train['content'].to_list())
+    print(train_topics)
 
     # create unique ids for each dataset
     train = train.reset_index(drop=True)
