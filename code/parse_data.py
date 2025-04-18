@@ -1,7 +1,7 @@
 from pyspark.sql import SparkSession
 import pyspark.pandas as ps
 import time
-from top2vec import top2vec
+from top2vec.top2vec import Top2Vec
 import numpy as np
 
 def find_topics(data: list[str]) -> np.ndarray:
@@ -9,7 +9,7 @@ def find_topics(data: list[str]) -> np.ndarray:
     documents = data
     
     try:
-        model = Top2Vec(documents, ngram=True, contextual_top2vec=True)
+        model = Top2Vec(documents, ngram_vocab=True, contextual_top2vec=True)
     except Exception as e:
         print("Couldn't create top2vec model.", e)
         return np.array([])
@@ -188,7 +188,9 @@ def main():
     test = test.dropna()
     
     # Use top2vec
+    # train_topics = train['content'].apply(find_topics)
     train_topics = find_topics(train['content'].to_list())
+    train['topics'] = train_topics
     print(train_topics)
 
     # create unique ids for each dataset
