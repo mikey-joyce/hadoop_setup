@@ -7,7 +7,7 @@ from pyspark.sql import SparkSession
 import ray
 import ray.data as rd
 import ray.train.huggingface.transformers
-from ray.train import ScalingConfig
+from ray.air.config import ScalingConfig
 from ray.train.torch import TorchTrainer
 from transformers import Trainer, TrainingArguments, AutoTokenizer, AutoModelForSequenceClassification
 
