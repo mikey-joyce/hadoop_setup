@@ -1,7 +1,4 @@
-import os
 import time
-
-os.environ["RAY_TRAIN_ENABLE_V2"] = "1"
 
 from pyspark.sql import SparkSession
 import ray
@@ -45,8 +42,10 @@ def main():
     train.show(5)
     time.sleep(10)
 
-    n_cpus = os.cpu_count()
-    scaling_config = ScalingConfig(num_workers=n_cpus, use_gpu=True)
+    resources = ray.cluster_resources()
+    n_gpus = int(resources.get("GPU", 0))
+    n_cpus = int(resources.get("CPU", 0))
+    scaling_config = ScalingConfig(num_workers=n_cpus, use_gpu=True, resources_per_worker={"CPU": 1, "GPU": n_gpus/n_cpus})
 
     config = {}
     trainer = TorchTrainer(train_func, scaling_config=scaling_config, train_loop_config=config)
