@@ -1,6 +1,8 @@
 import os
 import time
 
+os.environ["RAY_TRAIN_ENABLE_V2"] = "1"
+
 from pyspark.sql import SparkSession
 import ray
 import ray.data as rd
@@ -32,7 +34,6 @@ def main():
     # initialize sessions
     spark = SparkSession.builder.appName("ReadTrain").getOrCreate()
     ray.init()
-    os.environ["RAY_TRAIN_ENABLE_V2"] = "1"
     time.sleep(5)
 
     # load in da training data
