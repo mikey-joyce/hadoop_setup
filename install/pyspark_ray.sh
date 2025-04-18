@@ -10,7 +10,7 @@ python3 -m pip install --upgrade pip
 # Install Ray 2.5.0
 pip install ray[default]==2.5.0
 
-pip install pandas
+pip install pandas==2.1.4
 pip install pyarrow
 
 # install stuff we need for transformers and other stuffs
@@ -19,6 +19,9 @@ pip install "ray[train,air]" "transformers[torch]" datasets accelerate evaluate 
 pip install top2vec
 
 pip install "pydantic<2" --force-reinstall
+
+python3 -m pip uninstall setuptools
+python3 -m pip install setuptools
 
 # Verify PySpark and Ray installations
 echo 'Testing pyspark install..'
