@@ -1,6 +1,19 @@
 from pyspark.sql import SparkSession
 import pyspark.pandas as ps
 import time
+from top2vec import top2vec
+
+def find_topics(data: list[str]):
+    documents = data
+    
+    try:
+        model = Top2Vec(documents, ngram=True, contextual_top2vec=True)
+    except Exception as e:
+        print("Couldn't create top2vec model.", e)
+    
+    topic_words, word_scores, topic_nums = model.get_topics()
+    
+    return topic_words, word_scores, topic_nums
 
 def main():
     spark = SparkSession.builder.appName("ParseData").getOrCreate()
