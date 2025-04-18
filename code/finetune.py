@@ -45,7 +45,7 @@ def main():
     resources = ray.cluster_resources()
     n_cpus = int(resources.get("CPU", 1))
     n_gpus = int(resources.get("GPU", 0))
-    scaling_config = ScalingConfig(num_workers=2, use_gpu=True, resources_per_worker={"CPU": 5, "GPU": 1})
+    scaling_config = ScalingConfig(num_workers=2, use_gpu=True, resources_per_worker={"CPU": 4, "GPU": 1})
 
     config = {}
     trainer = TorchTrainer(train_func, scaling_config=scaling_config, train_loop_config=config)
