@@ -43,8 +43,8 @@ def main():
     time.sleep(10)
 
     resources = ray.cluster_resources()
+    n_cpus = int(resources.get("CPU", 1))
     n_gpus = int(resources.get("GPU", 0))
-    n_cpus = int(resources.get("CPU", 0))
     scaling_config = ScalingConfig(num_workers=n_cpus, use_gpu=True, resources_per_worker={"CPU": 1, "GPU": n_gpus/n_cpus})
 
     config = {}
