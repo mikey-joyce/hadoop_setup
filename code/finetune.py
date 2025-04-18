@@ -50,7 +50,7 @@ def main():
 
     config = {}
     trainer = TorchTrainer(train_func, scaling_config=scaling_config, train_loop_config=config)
-    # result = trainer.fit()
+    result = trainer.fit()
 
 
 if __name__ == "__main__":

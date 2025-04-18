@@ -7,16 +7,14 @@ pip install pyspark
 python3 -m pip install --upgrade setuptools pip
 python3 -m pip install --upgrade pip
 
-pip install pandas<2.1
-pip install pyarrow
-
 # Install Ray 2.5.0
 # install stuff we need for transformers and other stuffs
 pip install "ray[default,train,air]==2.5.0" --force-reinstall
-pip install "transformers[torch]" datasets accelerate evaluate numpy==1.24 scikit-learn --force-reinstall
+pip install "transformers[torch]" datasets accelerate evaluate scikit-learn --force-reinstall
 
 pip install top2vec
 
+pip install --force-reinstall "numpy==1.23.5" "pandas==2.0.3" "pyarrow==12.0.1"
 pip install "pydantic<2" --force-reinstall
 
 python3 -m pip uninstall setuptools
