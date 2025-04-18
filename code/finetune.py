@@ -5,9 +5,14 @@ import time
 
 def main():
     spark = SparkSession.builder.appName("ReadTrain").getOrCreate()
+    ray.init()
+
+    print("Session started...")
+    time.sleep(5)
+
     rdd = spark.sparkContext.textFile("hdfs:///phase2/data/train")
-    print("HELLO!")
-    time.sleep(10)
+    print(":)")
+    time.sleep(5)
     train = rd.from_items(rdd.toLocalIterator())
     train.show(5)
     time.sleep(60)
