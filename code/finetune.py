@@ -8,6 +8,8 @@ def main():
     rdd = spark.sparkContext.textFile("hdfs:///phase2/data/train")
     train = rdd.collect()
     train = rd.from_items(train)
+    print("HELLO!")
+    time.sleep(10)
     train.show(5)
     time.sleep(60)
 
