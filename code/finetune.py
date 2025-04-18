@@ -25,6 +25,9 @@ def train_func(config):
     tokenizer = AutoTokenizer.from_pretrained(transformer)
     model = AutoModelForSequenceClassification.from_pretrained(transformer)
 
+    print("Did we make it here?")
+    time.sleep(20)
+
     data = (train.select(range(100)).map(tokenize_function, batched=True))
     data.show(5)
     time.sleep(60)
