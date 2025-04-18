@@ -32,6 +32,7 @@ def main():
     # initialize sessions
     spark = SparkSession.builder.appName("ReadTrain").getOrCreate()
     ray.init()
+    os.environ["RAY_TRAIN_ENABLE_V2"] = "1"
     time.sleep(5)
 
     # load in da training data
