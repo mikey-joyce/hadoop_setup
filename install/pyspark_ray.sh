@@ -18,6 +18,8 @@ pip install "ray[train,air]" "transformers[torch]" datasets accelerate evaluate 
 
 pip install top2vec
 
+pip install "pydantic<2" --force-reinstall
+
 # Verify PySpark and Ray installations
 echo 'Testing pyspark install..'
 python3 -c "import pyspark; print(pyspark.__version__)"

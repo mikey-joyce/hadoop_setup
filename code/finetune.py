@@ -13,7 +13,7 @@ def main():
     rdd = spark.sparkContext.textFile("hdfs:///phase2/data/train")
     print(":)")
     time.sleep(5)
-    train = rd.from_items(rdd.toLocalIterator())
+    train = rd.from_items(list(rdd.toLocalIterator()))
     train.show(5)
     time.sleep(60)
 
