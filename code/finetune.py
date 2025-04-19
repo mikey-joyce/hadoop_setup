@@ -29,7 +29,7 @@ def train_func(config):
 
     batch_size = 100
     token_func = partial(tokenize_function, tokenizer=tokenizer)
-    data = config['train'].limit(batch_size).map(token_func, batch_size=batch_size)
+    data = config['train'].limit(batch_size).map(token_func, batched=True)
     # data.show(5)
     # time.sleep(60)
     preview = data.take(5)
