@@ -13,6 +13,14 @@ from ray.train.torch import TorchTrainer
 from transformers import Trainer, TrainingArguments, AutoTokenizer, AutoModelForSequenceClassification
 
 
+def parse_rdd(row_str):
+    match = re.search(r"Row\(content='(.*?)', sentiment='(.*?)', UID='(.*?)'\)", row_str)
+    if match:
+        return (match.group(1), match.group(2), match.group(3))
+    else:
+        return ("", "", "")
+
+
 def tokenize_function(examples, tokenizer):
         print(f"Data keys:\n{examples.keys()}")
         return tokenizer(examples['content'], padding="max_length", truncation=True)
@@ -40,6 +48,7 @@ def main():
 
     # load in da training data
     rdd = spark.sparkContext.textFile("hdfs:///phase2/data/train")
+    rdd = rdd.map(parse_rdd)
     sdf = rdd.toDF(["content", "sentiment", "UID"])
     psdf = ps.from_spark(sdf)
     train = rd.from_pandas(psdf.to_pandas())    # is this too inefficient? 
