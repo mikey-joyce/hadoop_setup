@@ -22,9 +22,9 @@ def parse_rdd(row_str):
 
 
 def tokenize_function(examples, tokenizer):
-        print(f"Data keys:\n{examples.keys()}")
-        print(f"Content data type:\n{type(examples['content'][0])}")
-        print(f"Content data :\n{examples['content'][0]}")
+        # print(f"Data keys:\n{examples.keys()}")
+        # print(f"Content data type:\n{type(examples['content'][0])}")
+        # print(f"Content data :\n{examples['content'][0]}")
         return tokenizer(examples['content'][0], padding="max_length", truncation=True)
 
 
@@ -36,10 +36,11 @@ def train_func(config):
 
     token_func = partial(tokenize_function, tokenizer=tokenizer)
     data = (config["train"].map_batches(token_func, batch_size=100, batch_format="numpy"))
-    # data.show(5)
+    print("Hello?")
+    data.show(5)
     # time.sleep(60)
-    preview = data.take(5)
-    print(f"Ray Data Preview: \n{preview}")
+    # preview = data.take(5)
+    # print(f"Ray Data Preview: \n{preview}")
 
 
 def main():
@@ -49,8 +50,7 @@ def main():
     time.sleep(5)
 
     # load in da training data
-    rdd = spark.sparkContext.textFile("hdfs:///phase2/data/train")
-    rdd = rdd.map(parse_rdd)
+    rdd = spark.sparkContext.textFile("hdfs:///phase2/data/train").map(parse_rdd)
     sdf = rdd.toDF(["content", "sentiment", "UID"])
     psdf = ps.DataFrame(sdf)
     psdf = psdf.dropna()
