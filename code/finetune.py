@@ -12,9 +12,8 @@ from transformers import Trainer, TrainingArguments, AutoTokenizer, AutoModelFor
 
 
 def tokenize_function(examples, tokenizer):
-        e = examples.asDict() 
-        print(f"Data prview:\n{e}")
-        return tokenizer(e["content"], padding="max_length", truncation=True)
+        print(f"Data keys:\n{examples.keys()}")
+        return tokenizer(examples["content"], padding="max_length", truncation=True)
 
 
 def train_func(config):
