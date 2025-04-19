@@ -50,7 +50,7 @@ def main():
     rdd = spark.sparkContext.textFile("hdfs:///phase2/data/train")
     rdd = rdd.map(parse_rdd)
     sdf = rdd.toDF(["content", "sentiment", "UID"])
-    psdf = ps.from_spark(sdf)
+    psdf = ps.DataFrame(sdf)
     train = rd.from_pandas(psdf.to_pandas())    # is this too inefficient? 
     train.show(5)
     time.sleep(10)
