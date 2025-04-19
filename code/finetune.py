@@ -20,9 +20,10 @@ logger.setLevel(logging.INFO)
 
 
 def tokenize_function(examples, tokenizer):
-        logger.info(f"Examples preview:\n{examples}")
-        print(examples)
-        return tokenizer(examples["content"], padding="max_length", truncation=True)
+        e = examples.asDict() 
+        logger.info(f"Examples preview:\n{e}")
+        print(e)
+        return tokenizer(e["content"], padding="max_length", truncation=True)
 
 
 def train_func(config):
