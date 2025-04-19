@@ -37,10 +37,10 @@ def train_func(config):
     token_func = partial(tokenize_function, tokenizer=tokenizer)
     data = (config["train"].map_batches(token_func, batch_size=100, batch_format="numpy"))
     print("Hello?")
-    data.show(5)
+    # data.show(5)
     # time.sleep(60)
-    # preview = data.take(5)
-    # print(f"Ray Data Preview: \n{preview}")
+    preview = data.take_batch(5)
+    print(f"Ray Data Preview: \n{preview}")
 
 
 def main():
