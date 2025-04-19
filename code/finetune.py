@@ -11,10 +11,6 @@ from ray.train.torch import TorchTrainer
 from transformers import Trainer, TrainingArguments, AutoTokenizer, AutoModelForSequenceClassification
 
 
-global train        # ensure the training variable has global scope so --> train_func() can access it (we load in data w/ spark before training)
-global tokenizer    # I didn't like --> tokenize_function() being within another function, making this global is an easy way to separate them
-
-
 # setup custom logger for debugging purposes
 logger = logging.getLogger("finetune_logger")
 handler = logging.FileHandler("finetune_log.txt")
