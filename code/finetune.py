@@ -12,7 +12,7 @@ from transformers import Trainer, TrainingArguments, AutoTokenizer, AutoModelFor
 
 
 def tokenize_function(examples, tokenizer):
-        print(f"Data item:\n{examples['item']}")
+        print(f"Data item:\n{examples['item'].keys()}")
         return tokenizer(examples["content"], padding="max_length", truncation=True)
 
 
