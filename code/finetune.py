@@ -2,6 +2,7 @@ from functools import partial
 import logging
 import time
 
+import evaluate
 from pyspark.sql import SparkSession
 import ray
 import ray.data as rd
@@ -26,10 +27,10 @@ def train_func(config):
     transformer = 'cardiffnlp/twitter-roberta-base-sentiment'
     tokenizer = AutoTokenizer.from_pretrained(transformer)
     model = AutoModelForSequenceClassification.from_pretrained(transformer)
+    metric = evaluate.load("accuracy")
 
-    batch_size = 100
     token_func = partial(tokenize_function, tokenizer=tokenizer)
-    data = (config["train"].limit(1000).map_batches(token_func, batch_size=batch_size, batch_format="numpy", compute="actors"))
+    data = (config["train"].map_batches(token_func, batch_size=100, batch_format="numpy"))
     # data.show(5)
     # time.sleep(60)
     preview = data.take(5)
