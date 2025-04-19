@@ -23,7 +23,8 @@ def parse_rdd(row_str):
 
 def tokenize_function(examples, tokenizer):
         print(f"Data keys:\n{examples.keys()}")
-        print(f"Content data type:\n{type(examples['content'])}")
+        print(f"Content data type:\n{type(examples['content'][0])}")
+        print(f"Content data :\n{examples['content'][0]}")
         return tokenizer(examples['content'], padding="max_length", truncation=True)
 
 
