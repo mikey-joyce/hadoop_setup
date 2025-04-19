@@ -1,3 +1,5 @@
+from functools import partial
+import logging
 import time
 
 from pyspark.sql import SparkSession
@@ -13,7 +15,14 @@ global train        # ensure the training variable has global scope so --> train
 global tokenizer    # I didn't like --> tokenize_function() being within another function, making this global is an easy way to separate them
 
 
-def tokenize_function(examples):
+# setup custom logger for debugging purposes
+logger = logging.getLogger("finetune_logger")
+handler = logging.FileHandler("finetune_log.txt")
+logger.addHandler(handler)
+logger.setLevel(logging.INFO)
+
+
+def tokenize_function(examples, tokenizer):
         return tokenizer(examples["content"], padding="max_length", truncation=True)
 
 
@@ -22,12 +31,12 @@ def train_func(config):
     tokenizer = AutoTokenizer.from_pretrained(transformer)
     model = AutoModelForSequenceClassification.from_pretrained(transformer)
 
-    print("Did we make it here?")
-    time.sleep(20)
-
-    data = (train.select(range(100)).map(tokenize_function, batched=True))
-    data.show(5)
-    time.sleep(60)
+    token_func = partial(tokenize_function, tokenizer=tokenizer)
+    data = (config['train'].select(range(100)).map(token_func, batched=True))
+    # data.show(5)
+    # time.sleep(60)
+    preview = data.take(5)
+    logger.info(f"Ray Data Preview: \n{preview}")
 
 
 def main():
@@ -47,7 +56,7 @@ def main():
     n_gpus = int(resources.get("GPU", 0))
     scaling_config = ScalingConfig(num_workers=2, use_gpu=True, resources_per_worker={"CPU": 4, "GPU": 1})
 
-    config = {}
+    config = {'train': train}
     trainer = TorchTrainer(train_func, scaling_config=scaling_config, train_loop_config=config)
     result = trainer.fit()
 
