@@ -1,5 +1,4 @@
 from functools import partial
-import logging
 import time
 
 import evaluate
@@ -12,17 +11,9 @@ from ray.train.torch import TorchTrainer
 from transformers import Trainer, TrainingArguments, AutoTokenizer, AutoModelForSequenceClassification
 
 
-# setup custom logger for debugging purposes
-logger = logging.getLogger("finetune_logger")
-handler = logging.FileHandler("finetune_log.txt")
-logger.addHandler(handler)
-logger.setLevel(logging.INFO)
-
-
 def tokenize_function(examples, tokenizer):
         e = examples.asDict() 
-        logger.info(f"Examples preview:\n{e}")
-        print(e)
+        print(f"Data prview:\n{e}")
         return tokenizer(e["content"], padding="max_length", truncation=True)
 
 
@@ -37,7 +28,7 @@ def train_func(config):
     # data.show(5)
     # time.sleep(60)
     preview = data.take(5)
-    logger.info(f"Ray Data Preview: \n{preview}")
+    print(f"Ray Data Preview: \n{preview}")
 
 
 def main():
