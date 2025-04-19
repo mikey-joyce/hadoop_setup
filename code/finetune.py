@@ -23,6 +23,7 @@ def parse_rdd(row_str):
 
 def tokenize_function(examples, tokenizer):
         print(f"Data keys:\n{examples.keys()}")
+        print(f"Content data type:\n{type(examples['content'])}")
         return tokenizer(examples['content'], padding="max_length", truncation=True)
 
 
@@ -51,6 +52,7 @@ def main():
     rdd = rdd.map(parse_rdd)
     sdf = rdd.toDF(["content", "sentiment", "UID"])
     psdf = ps.DataFrame(sdf)
+    psdf = psdf.dropna()
     train = rd.from_pandas(psdf.to_pandas())    # is this too inefficient? 
     train.show(5)
     time.sleep(10)
