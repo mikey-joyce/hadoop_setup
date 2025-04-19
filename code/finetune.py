@@ -4,6 +4,7 @@ import time
 
 import evaluate
 from pyspark.sql import SparkSession
+import pyspark.pandas as ps
 import ray
 import ray.data as rd
 import ray.train.huggingface.transformers
@@ -13,10 +14,8 @@ from transformers import Trainer, TrainingArguments, AutoTokenizer, AutoModelFor
 
 
 def tokenize_function(examples, tokenizer):
-        print(f"Data item 1:\n{examples['item'][0]}")
-        content = re.search(r"content='(.*?)'", examples['item'][0])
-        print(f"Content:\n{content}")
-        return tokenizer(content, padding="max_length", truncation=True)
+        print(f"Data keys:\n{examples.keys()}")
+        return tokenizer(examples['content'], padding="max_length", truncation=True)
 
 
 def train_func(config):
@@ -41,7 +40,9 @@ def main():
 
     # load in da training data
     rdd = spark.sparkContext.textFile("hdfs:///phase2/data/train")
-    train = rd.from_items(list(rdd.toLocalIterator()))
+    sdf = rdd.toDF(["content", "sentiment", "UID"])
+    psdf = ps.from_spark(sdf)
+    train = rd.from_pandas(psdf.to_pandas())    # is this too inefficient? 
     train.show(5)
     time.sleep(10)
 
