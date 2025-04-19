@@ -1,4 +1,5 @@
 from functools import partial
+import re
 import time
 
 import evaluate
@@ -12,9 +13,10 @@ from transformers import Trainer, TrainingArguments, AutoTokenizer, AutoModelFor
 
 
 def tokenize_function(examples, tokenizer):
-        print(f'Data length:\n{len(examples)}')
         print(f"Data item 1:\n{examples['item'][0]}")
-        return tokenizer(examples["content"], padding="max_length", truncation=True)
+        content = re.search(r"content='(.*?)'", examples['item'][0])
+        print(f"Content:\n{content}")
+        return tokenizer(content, padding="max_length", truncation=True)
 
 
 def train_func(config):
