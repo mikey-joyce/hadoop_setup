@@ -10,13 +10,10 @@ def find_topics(data: list[str]) -> np.ndarray:
     
     try:
         model = Top2Vec(documents, ngram_vocab=True, contextual_top2vec=True)
+        return model
     except Exception as e:
         print("Couldn't create top2vec model.", e)
-        return np.array([])
-
-    topic_distributions: np.ndarray  = model.get_document_topic_distribution()
-    return topic_distributions
-
+    
 def main():
     spark = SparkSession.builder.appName("ParseData").getOrCreate()
 
@@ -188,10 +185,15 @@ def main():
     test = test.dropna()
     
     # Use top2vec
-    # train_topics = train['content'].apply(find_topics)
-    train_topics = find_topics(train['content'].to_list())
-    train['topics'] = train_topics
-    print(train_topics)
+    model = Top2Vec(
+            documents=train['content'].to_list(),
+            ngram_vocab=True,
+            contextual_top2vec=True
+            )
+    
+    # get topic distributions
+    topic_distributions: np.ndarray = model.get_document_topic_distribution()
+    train['topics'] = topic_distributions.to_list()
 
     # create unique ids for each dataset
     train = train.reset_index(drop=True)
@@ -213,11 +215,16 @@ def main():
         [valid_none.to_spark(), 'valid_none'],
         [test.to_spark(), 'test']
     ]
-
+    
+    hdfs_save_dir_parquet = f"{hdfs_save_dir}/parquet"
     for sdf, name in sdfs:
         sdf.show(5)     # verify that there is actually data in the spark dataframes before saving as rdd
         time.sleep(10)
-        sdf.rdd.saveAsTextFile(f"{hdfs_save_dir}/{name}/")
+        # sdf.rdd.saveAsTextFile(f"{hdfs_save_dir}/{name}/")
+        try:
+            sdf.write.mode("overwrite").parquet(f"{hdfs_save_dir_parquet}/{name}/")
+        except Exception as e:
+            print("Couldn't save parquet files", e)
 
 def read_file(spark, file_path):
     ext = file_path.split('.')[-1].lower()
