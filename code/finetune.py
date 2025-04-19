@@ -20,6 +20,7 @@ logger.setLevel(logging.INFO)
 
 
 def tokenize_function(examples, tokenizer):
+        logger.info(f"Examples preview:\n{examples}")
         return tokenizer(examples["content"], padding="max_length", truncation=True)
 
 
