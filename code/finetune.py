@@ -2,6 +2,8 @@ from functools import partial
 import re
 import time
 import sys
+import subprocess
+import os
 
 import evaluate
 from pyspark.sql import SparkSession
@@ -13,6 +15,7 @@ from ray.air.config import ScalingConfig
 from ray.train.torch import TorchTrainer
 from transformers import Trainer, TrainingArguments, AutoTokenizer, AutoModelForSequenceClassification
 import raydp
+
 
 def parse_rdd(row_str):
     match = re.search(r"Row\(content='(.*?)', sentiment='(.*?)', UID='(.*?)'\)", row_str)
@@ -45,9 +48,17 @@ def train_func(config):
 
 
 def main():
+    # Get Hadoop classpath using the hadoop command
+    hadoop_classpath = subprocess.check_output(['hadoop', 'classpath']).decode('utf-8').strip()
+    os.environ['CLASSPATH'] = hadoop_classpath
+    
+    print("hadoop classpath")
+    print(hadoop_classpath)
+
     # initialize sessions
-    # spark = SparkSession.builder.appName("ReadTrain").getOrCreate()
+    spark = SparkSession.builder.appName("ReadTrain").getOrCreate()
     ray.init()
+    assert ray.is_initialized() # confirm that ray is initialized
     time.sleep(5)
 
     resources = ray.cluster_resources()
@@ -55,23 +66,29 @@ def main():
     n_gpus = int(resources.get("GPU", 0))
    
     # initialize spark
-    spark = raydp.init_spark(app_name="ReadTrain",
-            num_executors=n_cpus,
-            executor_cores=n_cpus,
-            executor_memory="8GB"
-            )
+    # spark = raydp.init_spark(app_name="ReadTrain",
+    #        num_executors=n_cpus,
+    #        executor_cores=n_cpus,
+    #        executor_memory="8GB"
+    #        )
 
 
     # load in training data from Parquet (created in parse_data.py)
+   
     train_spark_df = spark.read.parquet("hdfs:///phase2/data/train")
     train_spark_df.show(5)
     time.sleep(10)
 
     # convert Spark DataFrame to a Ray Dataset
-    train_dataset = rd.from_spark(train_spark_df)
+    # train_dataset = rd.from_spark(train_spark_df)
+    namenode = "hdfs://localhost:9000"
+    datapath = f"{namenode}/phase2/data/train/*.parquet"
+    train_dataset = rd.read_parquet(datapath)
+    print("print sample data")
+    print(train_dataset.take(2))
 
     # check if train_dataset is loaded
-    train_dataset.show(3)
+    #train_dataset.show(3)
 
     scaling_config = ScalingConfig(
         num_workers=n_gpus, 
