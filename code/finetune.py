@@ -1,6 +1,7 @@
 from functools import partial
 import re
 import time
+import sys
 
 import evaluate
 from pyspark.sql import SparkSession
@@ -11,7 +12,7 @@ import ray.train.huggingface.transformers
 from ray.air.config import ScalingConfig
 from ray.train.torch import TorchTrainer
 from transformers import Trainer, TrainingArguments, AutoTokenizer, AutoModelForSequenceClassification
-
+import raydp
 
 def parse_rdd(row_str):
     match = re.search(r"Row\(content='(.*?)', sentiment='(.*?)', UID='(.*?)'\)", row_str)
@@ -45,9 +46,21 @@ def train_func(config):
 
 def main():
     # initialize sessions
-    spark = SparkSession.builder.appName("ReadTrain").getOrCreate()
+    # spark = SparkSession.builder.appName("ReadTrain").getOrCreate()
     ray.init()
     time.sleep(5)
+
+    resources = ray.cluster_resources()
+    n_cpus = int(resources.get("CPU", 1)) - 1
+    n_gpus = int(resources.get("GPU", 0))
+   
+    # initialize spark
+    spark = raydp.init_spark(app_name="ReadTrain",
+            num_executors=n_cpus,
+            executor_cores=n_cpus,
+            executor_memory="8GB"
+            )
+
 
     # load in training data from Parquet (created in parse_data.py)
     train_spark_df = spark.read.parquet("hdfs:///phase2/data/train")
@@ -57,9 +70,10 @@ def main():
     # convert Spark DataFrame to a Ray Dataset
     train_dataset = rd.from_spark(train_spark_df)
 
-    resources = ray.cluster_resources()
-    n_cpus = int(resources.get("CPU", 1)) - 1
-    n_gpus = int(resources.get("GPU", 0))
+    # check if train_dataset is loaded
+    train_dataset.show(3)
+    sys.exit(0)
+
     scaling_config = ScalingConfig(
         num_workers=n_gpus, 
         use_gpu=True, 
