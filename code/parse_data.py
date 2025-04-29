@@ -185,7 +185,7 @@ def main():
     test = test.reset_index(drop=True)
     test['UID'] = test.index.map(lambda i: f"test{i}")
 
-    # convert pandas dataframes to spark dataframes and save them as RDDs to the hdfs directory
+    # convert pandas dataframes to spark dataframes and save them as Parquet files
     sdfs = [
         [train.to_spark(), 'train'],
         [valid_labels.to_spark(), 'valid_labels'],
@@ -194,7 +194,7 @@ def main():
     ]
 
     for sdf, name in sdfs:
-        sdf.show(5)     # verify that there is actually data in the spark dataframes before saving as rdd
+        sdf.show(5)  # verify that there is actually data in the spark dataframes before saving
         time.sleep(10)
         sdf.write.mode("overwrite").parquet(f"{hdfs_save_dir}/{name}/")
 
