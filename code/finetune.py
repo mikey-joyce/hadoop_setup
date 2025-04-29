@@ -97,6 +97,11 @@ def main():
     print("print sample data")
     print(train_dataset.take(2))
     
+    spark_count = train_spark_df.count()
+    ray_count = train_dataset.count()
+
+    print(f"Spark DataFrame count: {spark_count}")
+    print(f"Ray Dataset count: {ray_count}")
     sys.exit(0)
     # check if train_dataset is loaded
     #train_dataset.show(3)
