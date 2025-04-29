@@ -4,6 +4,7 @@ import time
 import sys
 import subprocess
 import os
+from hdfs_utils import clean_empty_parquet_files
 
 import evaluate
 from pyspark.sql import SparkSession
@@ -48,6 +49,7 @@ def train_func(config):
     print(f"Ray Data Preview: \n{preview}")
 
 
+
 def main():
     # Get Hadoop classpath using the hadoop command
     hadoop_classpath = subprocess.check_output(['hadoop', 'classpath']).decode('utf-8').strip()
@@ -80,6 +82,11 @@ def main():
     train_spark_df.show(5)
     time.sleep(10)
 
+    # Delete empty parquet files
+    hdfs_path = "/phase2/data/train"
+    cleanup_results = clean_empty_parquet_files(hdfs_path, spark=spark, verbose=True)
+    print(f"Cleaned {cleanup_results['empty_files_removed']} empty files and {cleanup_results['error_files_removed']} error files")
+
     # convert Spark DataFrame to a Ray Dataset
     # train_dataset = rd.from_spark(train_spark_df)
     hdfs = pa.fs.HadoopFileSystem("localhost", 9000)
@@ -89,7 +96,8 @@ def main():
         )
     print("print sample data")
     print(train_dataset.take(2))
-
+    
+    sys.exit(0)
     # check if train_dataset is loaded
     #train_dataset.show(3)
 
