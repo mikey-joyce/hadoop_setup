@@ -25,7 +25,7 @@ def tokenize_function(examples, tokenizer):
         # print(f"Data keys:\n{examples.keys()}")
         # print(f"Content data type:\n{type(examples['content'][0])}")
         # print(f"Content data :\n{examples['content'][0]}")
-        return tokenizer(examples['content'][0], padding="max_length", truncation=True)
+        return tokenizer(examples['content'][0], truncation=True)
 
 
 def train_func(config):
