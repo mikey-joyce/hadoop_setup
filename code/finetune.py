@@ -72,7 +72,6 @@ def main():
 
     # check if train_dataset is loaded
     train_dataset.show(3)
-    sys.exit(0)
 
     scaling_config = ScalingConfig(
         num_workers=n_gpus, 
