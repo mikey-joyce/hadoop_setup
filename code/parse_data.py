@@ -196,6 +196,14 @@ def main():
     for sdf, name in sdfs:
         sdf.show(5)  # verify that there is actually data in the spark dataframes before saving
         time.sleep(10)
+
+        row_count = sdf.count()
+        rows_per_partition = 200000
+        num_partitions = max(1, int(row_count/rows_per_partition)) # calculate num partitions; minimum 1
+
+        print(f"Dataset {name}: {row_count} rows, using {num_partitions} partition (target: 100MB each)")
+
+        sdf.repartition(num_partitions)
         sdf.write.mode("overwrite").parquet(f"{hdfs_save_dir}/{name}/")
 
 def read_file(spark, file_path):
