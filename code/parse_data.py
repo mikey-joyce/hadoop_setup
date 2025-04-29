@@ -2,19 +2,24 @@ from pyspark.sql import SparkSession
 import pyspark.pandas as ps
 import time
 
-def delete_empty_files(spark, directory):
+def delete_empty_files(spark, directory, file_extension):
     """
-    Deletes files with 0 bytes in the specified HDFS directory.
+    Deletes empty files with the specified file extension in the HDFS directory.
+    
+    Parameters:
+        spark: SparkSession object.
+        directory: HDFS directory to search.
+        file_extension: The file extension (e.g., '.crc', '.tmp') to target.
+                        Files not ending with this extension will be left untouched.
     """
-    # get hadoop file system object from the spark context
     hadoop_conf = spark.sparkContext._jsc.hadoopConfiguration()
     fs = spark._jvm.org.apache.hadoop.fs.FileSystem.get(hadoop_conf)
     dir_path = spark._jvm.org.apache.hadoop.fs.Path(directory)
 
-    # list all files in the directory; convert to list for iteration
     for fileStatus in fs.listStatus(dir_path):
-        if fileStatus.getLen() == 0:
-            file_path = fileStatus.getPath()
+        file_path = fileStatus.getPath()
+        file_name = file_path.getName()
+        if file_name.endswith(file_extension) and fileStatus.getLen() == 0:
             print(f"Deleting empty file: {file_path}")
             fs.delete(file_path, False)
 
@@ -225,7 +230,7 @@ def main():
     # After saving, delete any empty files from each dataset directory.
     for _, name in sdfs:
         directory = f"{hdfs_save_dir}/{name}/"
-        delete_empty_files(spark, directory)
+        delete_empty_files(spark, directory, ".parquet")
 
 def read_file(spark, file_path):
     ext = file_path.split('.')[-1].lower()
