@@ -49,21 +49,24 @@ def main():
     ray.init()
     time.sleep(5)
 
-    # load in da training data
-    rdd = spark.sparkContext.textFile("hdfs:///phase2/data/train").map(parse_rdd)
-    sdf = rdd.toDF(["content", "sentiment", "UID"])
-    psdf = ps.DataFrame(sdf)
-    psdf = psdf.dropna()
-    train = rd.from_pandas(psdf.to_pandas())    # is this too inefficient? 
-    train.show(5)
+    # load in training data from Parquet (created in parse_data.py)
+    train_spark_df = spark.read.parquet("hdfs:///phase2/data/train")
+    train_spark_df.show(5)
     time.sleep(10)
+
+    # convert Spark DataFrame to a Ray Dataset
+    train_dataset = rd.from_spark(train_spark_df)
 
     resources = ray.cluster_resources()
     n_cpus = int(resources.get("CPU", 1)) - 1
     n_gpus = int(resources.get("GPU", 0))
-    scaling_config = ScalingConfig(num_workers=n_gpus, use_gpu=True, resources_per_worker={"CPU": round(n_cpus/n_gpus, 0), "GPU":1})
+    scaling_config = ScalingConfig(
+        num_workers=n_gpus, 
+        use_gpu=True, 
+        resources_per_worker={"CPU": round(n_cpus/n_gpus, 0), "GPU": 1}
+    )
 
-    config = {'train': train}
+    config = {'train': train_dataset}
     trainer = TorchTrainer(train_func, scaling_config=scaling_config, train_loop_config=config)
     result = trainer.fit()
 
