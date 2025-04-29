@@ -196,7 +196,7 @@ def main():
     for sdf, name in sdfs:
         sdf.show(5)     # verify that there is actually data in the spark dataframes before saving as rdd
         time.sleep(10)
-        sdf.rdd.saveAsTextFile(f"{hdfs_save_dir}/{name}/")
+        sdf.write.mode("overwrite").parquet(f"{hdfs_save_dir}/{name}/")
 
 def read_file(spark, file_path):
     ext = file_path.split('.')[-1].lower()
