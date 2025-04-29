@@ -15,7 +15,8 @@ from ray.air.config import ScalingConfig
 from ray.train.torch import TorchTrainer
 from transformers import Trainer, TrainingArguments, AutoTokenizer, AutoModelForSequenceClassification
 import raydp
-
+import pyarrow as pa
+import pyarrow.dataset as ds
 
 def parse_rdd(row_str):
     match = re.search(r"Row\(content='(.*?)', sentiment='(.*?)', UID='(.*?)'\)", row_str)
@@ -81,9 +82,11 @@ def main():
 
     # convert Spark DataFrame to a Ray Dataset
     # train_dataset = rd.from_spark(train_spark_df)
-    namenode = "hdfs://localhost:9000"
-    datapath = f"{namenode}/phase2/data/train/*.parquet"
-    train_dataset = rd.read_parquet(datapath)
+    hdfs = pa.fs.HadoopFileSystem("localhost", 9000)
+    train_dataset = rd.read_parquet(
+        "/phase2/data/train/",  # No need for namenode prefix when using filesystem param
+        filesystem=hdfs
+        )
     print("print sample data")
     print(train_dataset.take(2))
 
