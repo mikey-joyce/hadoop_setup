@@ -2,6 +2,22 @@ from pyspark.sql import SparkSession
 import pyspark.pandas as ps
 import time
 
+def delete_empty_files(spark, directory):
+    """
+    Deletes files with 0 bytes in the specified HDFS directory.
+    """
+    # get hadoop file system object from the spark context
+    hadoop_conf = spark.sparkContext._jsc.hadoopConfiguration()
+    fs = spark._jvm.org.apache.hadoop.fs.FileSystem.get(hadoop_conf)
+    dir_path = spark._jvm.org.apache.hadoop.fs.Path(directory)
+
+    # list all files in the directory; convert to list for iteration
+    for fileStatus in fs.listStatus(dir_path):
+        if fileStatus.getLen() == 0:
+            file_path = fileStatus.getPath()
+            print(f"Deleting empty file: {file_path}")
+            fs.delete(file_path, False)
+
 def main():
     spark = SparkSession.builder.appName("ParseData").getOrCreate()
 
@@ -194,17 +210,22 @@ def main():
     ]
 
     for sdf, name in sdfs:
-        sdf.show(5)  # verify that there is actually data in the spark dataframes before saving
+        sdf.show(5)  # verify that there is data before saving
         time.sleep(10)
 
         row_count = sdf.count()
         rows_per_partition = 200000
-        num_partitions = max(1, int(row_count/rows_per_partition)) # calculate num partitions; minimum 1
+        num_partitions = max(1, int(row_count/rows_per_partition))  # minimum 1 partition
 
         print(f"Dataset {name}: {row_count} rows, using {num_partitions} partition (target: 100MB each)")
 
         sdf.repartition(num_partitions)
         sdf.write.mode("overwrite").parquet(f"{hdfs_save_dir}/{name}/")
+
+    # After saving, delete any empty files from each dataset directory.
+    for _, name in sdfs:
+        directory = f"{hdfs_save_dir}/{name}/"
+        delete_empty_files(spark, directory)
 
 def read_file(spark, file_path):
     ext = file_path.split('.')[-1].lower()
