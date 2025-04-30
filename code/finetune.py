@@ -27,7 +27,32 @@ def parse_rdd(row_str):
         return (match.group(1), match.group(2), match.group(3))
     else:
         return ("", "", "")
+def collate_fn(batch, tokenizer):
+        """
+    Process a batch of data for the model.
+    
+    Args:
+        batch: Dictionary containing the batch data
+        tokenizer: HuggingFace tokenizer to use
+        
+    Returns:
+        Dictionary with model inputs and labels
+    """
 
+    outputs = tokenizer(
+            list(batch["content"]),
+            truncation=True,
+            padding="longest",
+            return_tensors="pt",
+            )
+
+    outputs["labels"] = torch.tensor([int(label) for label in batch["sentiment"]])
+
+    if torch.cuda.is_available():
+        outputs = {k: v.cuda() for k, v in outputs.items()}
+
+    return outputs
+    
 def tokenize_function(examples, tokenizer):
     # print(f"Data keys:\n{examples.keys()}")
     # print(f"Content data type:\n{type(examples['content'][0])}")
@@ -36,16 +61,16 @@ def tokenize_function(examples, tokenizer):
 
 def train_func(config):
     transformer = 'cardiffnlp/twitter-roberta-base-sentiment'
-    tokenizer = AutoTokenizer.from_pretrained(transformer)
+    tokenizer = AutoTokenizer.from_pretrained(transformer, use_fast=True) # use_fast may not be available. But if it is, use it.
     model = AutoModelForSequenceClassification.from_pretrained(transformer)
     metric = evaluate.load("accuracy")
 
     token_func = partial(tokenize_function, tokenizer=tokenizer)
     data = config["train"].map_batches(token_func, batch_size=100, batch_format="numpy")
     print("Hello?")
-# data.show(5)
+    # data.show(5)
     # time.sleep(60)
-# data.show(5)
+    # data.show(5)
     # time.sleep(60)
     preview = data.take_batch(5)
     print(f"Ray Data Preview: \n{preview}")
@@ -87,6 +112,8 @@ def load_and_prepare_dataset(spark, hdfs_path):
     # Ensure trailing slash for proper reading by Ray
     path = hdfs_path if hdfs_path.endswith("/") else hdfs_path + "/"
     train_dataset = rd.read_parquet(path, filesystem=hdfs)
+    print("Dataset type:")
+    print(type(train_dataset))
     
     print("Print sample data from Ray Dataset:")
     print(train_dataset.take(2))
