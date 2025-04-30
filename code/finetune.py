@@ -4,6 +4,7 @@ import time
 import sys
 import subprocess
 import os
+import json
 
 from hadoop_setup import setup_hadoop_classpath
 from load_data import load_and_prepare_dataset
@@ -172,10 +173,25 @@ def init_ray():
     time.sleep(5)
 
     resources = ray.cluster_resources()
-    n_cpus = int(resources.get("CPU", 1)) - 1
+    n_cpus = max(int(resources.get("CPU", 1)) - 1, 1) # Subtract 1 to leave one CPU for driver
     n_gpus = int(resources.get("GPU", 0))
 
     return n_cpus, n_gpus
+
+def display_training_config(training_config: dict, scaling_config: ScalingConfig):
+    """
+    Displays the training and scaling configuration in a friendly format.
+    """
+    print("=== Training Configuration ===")
+    for key, value in training_config.items():
+        print(f"{key}: {value}")
+    print("==============================")
+    print("=== Scaling Configuration ===")
+    print(f"num_workers: {scaling_config.num_workers}")
+    print(f"use_gpu: {scaling_config.use_gpu}")
+    print("resources_per_worker:")
+    print(json.dumps(scaling_config.resources_per_worker, indent=4))
+    print("==============================")
 
 def main():
     # Setup Hadoop classpath via external function
@@ -195,11 +211,20 @@ def main():
     train_dataset = load_and_prepare_dataset(spark, train_path)
     val_dataset = load_and_prepare_dataset(spark, val_path)
 
-    # Configure resource scaling for Ray Trainer
-    worker_resources = {"CPU": round(n_cpus/n_gpus, 0), "GPU": 1} if n_gpus > 0 else {"CPU": n_cpus}
+    # Determine per-worker resource allocation
+    if n_gpus > 0:
+        if n_gpus > n_cpus:
+            cpus_per_worker = 1  # Ensure each GPU worker gets at least 1 CPU
+        else:
+            cpus_per_worker = n_cpus // n_gpus  # Use integer division for clarity
+        worker_resources = {"CPU": cpus_per_worker, "GPU": 1}
+    else:
+        worker_resources = {"CPU": n_cpus}
+
+    # Scaling config
     scaling_config = ScalingConfig(
-        num_workers=n_gpus if n_gpus > 0 else 1, 
-        use_gpu=bool(n_gpus), 
+        num_workers=n_gpus if n_gpus > 0 else 1,
+        use_gpu=bool(n_gpus),
         resources_per_worker=worker_resources
     )
     
@@ -213,15 +238,20 @@ def main():
     }
 
     # Configure Ray Trainer
-    config = {'train': train_dataset, 
-              'val': val_dataset,
-              **hyperparameters}
+    config = {
+        'train': train_dataset, 
+        'val': val_dataset,
+        **hyperparameters
+    }
     
+    # Display training configuration including per-worker resources before training starts
+    display_training_config(hyperparameters, scaling_config)
+
     trainer = TorchTrainer(
         train_func, 
         scaling_config=scaling_config, 
         train_loop_config=config,
-        )
+    )
     
     result = trainer.fit()
     print("Training completed with result: ", result)
