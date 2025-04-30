@@ -23,8 +23,8 @@ def load_and_prepare_dataset(spark, hdfs_path):
     hdfs = pa.fs.HadoopFileSystem("localhost", 9000)
 
     # Ensure trailing slash for proper reading by Ray
-    path = hdfs_path if hdfs_path.endswith("/") else hdfs_path + "/"
-    train_dataset = rd.read_parquet(path, filesystem=hdfs)
+    # path = hdfs_path if hdfs_path.endswith("/") else hdfs_path + "/"
+    train_dataset = rd.read_parquet(hdfs_path, filesystem=hdfs)
     
     print("Dataset type:")
     print(type(train_dataset))

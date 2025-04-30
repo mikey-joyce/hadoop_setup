@@ -188,7 +188,7 @@ def main():
     n_cpus, n_gpus = init_ray()
 
     # Load, clean, and prepare dataset from HDFS
-    hdfs_path = "/phase2/data/"
+    hdfs_path = "/phase2/data"
     train_path = f"{hdfs_path}/train"
     val_path = f"{hdfs_path}/valid_labels"
     
