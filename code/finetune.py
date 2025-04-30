@@ -16,10 +16,13 @@ import ray.data as rd
 import ray.train.huggingface.transformers
 from ray.air.config import ScalingConfig
 from ray.train.torch import TorchTrainer
+import ray.train
+from ray.train.huggingface.transformers import prepare_trainer, RayTrainReportCallback
 from transformers import Trainer, TrainingArguments, AutoTokenizer, AutoModelForSequenceClassification
 import raydp
 import pyarrow as pa
 import pyarrow.dataset as ds
+import torch
 
 def parse_rdd(row_str):
     match = re.search(r"Row\(content='(.*?)', sentiment='(.*?)', UID='(.*?)'\)", row_str)
@@ -27,6 +30,7 @@ def parse_rdd(row_str):
         return (match.group(1), match.group(2), match.group(3))
     else:
         return ("", "", "")
+
 def collate_fn(batch, tokenizer):
         """
     Process a batch of data for the model.
@@ -59,21 +63,130 @@ def tokenize_function(examples, tokenizer):
     # print(f"Content data :\n{examples['content'][0]}")
     return tokenizer(examples['content'][0], truncation=True)
 
-def train_func(config):
-    transformer = 'cardiffnlp/twitter-roberta-base-sentiment'
-    tokenizer = AutoTokenizer.from_pretrained(transformer, use_fast=True) # use_fast may not be available. But if it is, use it.
-    model = AutoModelForSequenceClassification.from_pretrained(transformer)
-    metric = evaluate.load("accuracy")
+def compute_metrics(eval_pred) -> dict[str, int]:
+      """
+    Calculate evaluation metrics based on predictions and labels.
 
-    token_func = partial(tokenize_function, tokenizer=tokenizer)
-    data = config["train"].map_batches(token_func, batch_size=100, batch_format="numpy")
-    print("Hello?")
-    # data.show(5)
-    # time.sleep(60)
-    # data.show(5)
-    # time.sleep(60)
-    preview = data.take_batch(5)
-    print(f"Ray Data Preview: \n{preview}")
+    Args:
+        eval_pred: Tuple of (predictions, labels)
+
+    Returns:
+        Dictionary of metric names and values
+    """
+    predictions, labels = eval_pred
+    predictions = np.argmax(predictions, axis=1)
+
+    # Load multiple metrics for comprehensive evaluation
+    accuracy_metric = load_metric("accuracy")
+    f1_metric = load_metric("f1", "multiclass")
+    precision_metric = load_metric("precision", "multiclass")
+    recall_metric = load_metric("recall", "multiclass")
+
+    # Calculate each metric
+    accuracy = accuracy_metric.compute(predictions=predictions, references=labels)
+    f1 = f1_metric.compute(predictions=predictions, references=labels, average="weighted", num_classes=len(np.unique(labels)))
+    precision = precision_metric.compute(predictions=predictions, references=labels, average="weighted", num_classes=len(np.unique(labels)))
+    recall = recall_metric.compute(predictions=predictions, references=labels, average="weighted", num_classes=len(np.unique(labels)))
+
+    # Combine all metrics
+    return {
+        "accuracy": accuracy["accuracy"],
+        "f1": f1["f1"],
+        "precision": precision["precision"],
+        "recall": recall["recall"]
+    }
+
+def count_unique_labels(dataset, label_column="sentiment"):
+    """
+    Count unique labels in a Ray dataset.
+    """
+    unique_labels = set()
+    for batch in dataset.iter_batches(batch_size=1000):
+        unique_labels.update(batch[label_column])
+    return len(unique_labels), unique_labels
+
+def train_func(config):
+        """
+    Main training function to be executed by Ray.
+    """
+    print(f"Is CUDA available: {torch.cuda.is_available()}")
+
+    # Get datasets from config
+    train_dataset = config["train"]
+    eval_dataset = config.get("val")
+
+    # Calculate maximum steps per epoch
+    batch_size = config.get("batch_size", 16)
+    num_workers = config.get("num_workers", 1)
+    max_steps_per_epoch = train_dataset.count() // (batch_size * num_workers)
+    print(f"Max steps per epoch: {max_steps_per_epoch}")
+    
+    # Load model and tokenizer
+    model_name = "cardiffnlp/twitter-roberta-base-sentiment"
+    tokenizer = AutoTokenizer.from_pretrained(model_name, use_fast=True)
+    
+    # Get label count
+    num_labels, unique_labels = count_unique_labels(train_dataset)
+    print(f"Detected {num_labels} unique labels: {unique_labels}")
+    
+    # Load model with correct number of labels
+    model = AutoModelForSequenceClassification.from_pretrained(
+        model_name,
+        num_labels=num_labels
+    )
+    
+    # Create data collator using partial
+    data_collator = partial(collate_fn, tokenizer=tokenizer)
+    
+    # Define training arguments
+    training_args = TrainingArguments(
+        output_dir="./results",
+        evaluation_strategy="epoch",
+        save_strategy="epoch",
+        logging_strategy="epoch",
+        per_device_train_batch_size=batch_size,
+        per_device_eval_batch_size=batch_size*2,
+        learning_rate=config.get("learning_rate", 2e-5),
+        num_train_epochs=config.get("epochs", 3),
+        weight_decay=config.get("weight_decay", 0.01),
+        warmup_ratio=0.1,
+        logging_dir="./logs",
+        load_best_model_at_end=True if eval_dataset else False,
+        metric_for_best_model="f1" if eval_dataset else None,
+        fp16=True,  # Mixed precision training
+        push_to_hub=False,
+        disable_tqdm=True,  # Cleaner output in distributed environments
+        report_to="none",
+    )
+    
+    # Initialize the trainer
+    trainer = Trainer(
+        model=model,
+        args=training_args,
+        train_dataset=train_dataset,
+        eval_dataset=eval_dataset,
+        data_collator=data_collator,
+        compute_metrics=compute_metrics  # Add metrics computation
+    )
+    
+    # Add Ray reporting callback
+    trainer.add_callback(RayTrainReportCallback())
+    
+    # Train the model
+    print("Starting training")
+    trainer.train()
+    
+    # Save model and tokenizer
+    model_path = "./sentiment_model"
+    model.save_pretrained(model_path)
+    tokenizer.save_pretrained(model_path)
+    
+    # Return results
+    if eval_dataset:
+        eval_results = trainer.evaluate()
+        return eval_results
+    return {"status": "completed"}
+    
 
 def init_ray():
     """
