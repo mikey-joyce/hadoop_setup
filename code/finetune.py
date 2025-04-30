@@ -69,6 +69,8 @@ def collate_fn(batch, tokenizer):
 def train_func(config: dict):
     """
     Main training function to be executed by Ray.
+    This function largely follows the train_func from https://docs.ray.io/en/latest/train/examples/transformers/huggingface_text_classification.html#hf-train,
+    which takes from https://huggingface.co/docs/transformers/en/training#trainer
     """
     print(f"Is CUDA available: {torch.cuda.is_available()}")
 
