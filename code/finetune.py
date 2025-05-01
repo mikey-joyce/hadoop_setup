@@ -69,7 +69,9 @@ def collate_fn(batch, tokenizer):
     
     # create token_type_ids and labels
     outputs["token_type_ids"] = torch.zeros((batch_size, seq_length), dtype=torch.long)
-    outputs["labels"] = torch.tensor([int(label) for label in batch["sentiment"]])
+
+    # Convert potentially float-like strings to float first, then to an integer
+    outputs["labels"] = torch.tensor([int(float(label)) for label in batch["sentiment"]])
 
     return outputs
     
