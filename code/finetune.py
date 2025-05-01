@@ -213,7 +213,7 @@ def main():
     # Determine per-worker resource allocation
     if n_gpus > 0:
         num_workers = n_gpus
-        cpus_per_worker = max(1, n_cpus // num_workers)
+        cpus_per_worker = 1
         worker_resources = {"CPU": cpus_per_worker, "GPU": 1}
     else:
         num_workers = 1
