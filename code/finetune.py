@@ -125,8 +125,8 @@ def train_func(config):
     val_ds = ray.train.get_dataset_shard("val")
     
     logger.info("Data shards obtained successfully")
-    logger.info("Train dataset size: %s", train_ds.count())
-    logger.info("Validation dataset size: %s", val_ds.count() if val_ds else "No validation dataset provided")
+    logger.info(train_ds)
+    logger.info(val_ds if val_ds else "No validation dataset provided")
     
     if train_ds is None:
         logger.error("Training dataset is None. Please provide a valid dataset.")
