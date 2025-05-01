@@ -59,6 +59,7 @@ def collate_fn(batch, tokenizer):
             list(batch["content"]),
             truncation=True,
             padding="longest",
+            max_length=512,
             return_tensors="pt",
             )
     
