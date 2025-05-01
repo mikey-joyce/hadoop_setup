@@ -2,7 +2,15 @@ import numpy as np
 import evaluate
 import ray.data as rd
 
-def compute_metrics(eval_pred) -> dict[str, int]:
+def compute_metrics(eval_pred, metric_name="accuracy"):
+    predictions, labels = eval_pred
+    predictions = np.argmax(predictions, axis=1)
+    accuracy_metric = evaluate.load(metric_name)
+    accuracy = accuracy_metric.compute(predictions=predictions, references=labels)
+    
+    return accuracy
+
+def compute_multiple_metrics(eval_pred) -> dict[str, int]:
     """
     Calculate evaluation metrics based on predictions and labels.
 

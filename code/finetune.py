@@ -15,16 +15,19 @@ import pyspark.pandas as ps
 import ray
 import ray.data as rd
 import ray.train.huggingface.transformers
-from ray.air.config import ScalingConfig
+from ray.train import ScalingConfig, RunConfig, CheckpointConfig
 from ray.train.torch import TorchTrainer
 import ray.train
 from ray.train.huggingface.transformers import prepare_trainer, RayTrainReportCallback
 from transformers import Trainer, TrainingArguments, AutoTokenizer, AutoModelForSequenceClassification
-
+import evaluate
 import pyarrow as pa
 import pyarrow.dataset as ds
 import torch
 import numpy as np
+
+# MODEL_NAME = "cardiffnlp/twitter-roberta-base-sentiment"
+# NUM_LABELS = 3
 
 # def parse_rdd(row_str):
 #     match = re.search(r"Row\(content='(.*?)', sentiment='(.*?)', UID='(.*?)'\)", row_str)
@@ -65,105 +68,85 @@ def collate_fn(batch, tokenizer):
 #     # print(f"Content data :\n{examples['content'][0]}")
 #     return tokenizer(examples['content'][0], truncation=True)
 
-
-def train_func(config: dict):
-    """
-    Main training function to be executed by Ray.
-    This function largely follows the train_func from https://docs.ray.io/en/latest/train/examples/transformers/huggingface_text_classification.html#hf-train,
-    which takes from https://huggingface.co/docs/transformers/en/training#trainer
-    """
-    print(f"Is CUDA available: {torch.cuda.is_available()}")
-
-    # Get datasets from config
-    train_dataset = config.get("train")
-    val_dataset = config.get("val")
+def train_func(config):
+    use_gpu = True if torch.cuda.is_available() else False
+    print(f"Is CUDA available: {use_gpu}")
     
-    if train_dataset is None:
-        raise ValueError("Training dataset is None. Please provide a valid dataset.")
-    if val_dataset is None:
-        choice = input("No validation dataset provided. Restart or continue? (r/c): ")
-        if choice.lower() == "r":
-            raise ValueError("Validation dataset is None. Please provide a valid dataset.")
-        elif choice.lower() == "c":
-            print("Continuing without validation dataset.")
-        val_dataset = None
-
-    # Calculate maximum steps per epoch
+    name = config.get("name", "twitter-roberta-finetune")
+    model_name = config.get("model_name", "cardiffnlp/twitter-roberta-base-sentiment")
+    num_labels = config.get("num_labels", 3)
+    max_steps_per_epoch = config.get("max_steps_per_epoch", 1000)
     batch_size = config.get("batch_size", 16)
     learning_rate = config.get("learning_rate", 2e-5)
-    epochs = config.get("epochs", 3)
+    epochs = config.get("epochs", 10)
     weight_decay = config.get("weight_decay", 0.01)
+    use_gpu = config.get("use_gpu", False)
     
-    # Compute maximum steps per epoch
-    num_workers = config.get("num_workers", 1)
-    max_steps_per_epoch = train_dataset.count() // (batch_size * num_workers)
-    print(f"Max steps per epoch: {max_steps_per_epoch}")
-    
-    # Load tokenizer
-    model_name = "cardiffnlp/twitter-roberta-base-sentiment"
+    metric = evaluate.load("accuracy")
     tokenizer = AutoTokenizer.from_pretrained(model_name, use_fast=True)
-    
-    # Get label count
-    num_labels, unique_labels = count_unique_labels(train_dataset)
-    print(f"Detected {num_labels} unique labels: {unique_labels}")
-    
-    # Load model
     model = AutoModelForSequenceClassification.from_pretrained(
         model_name,
         num_labels=num_labels
     )
     
-    # Create data collator using partial
-    data_collator = partial(collate_fn, tokenizer=tokenizer)
+    train_ds = ray.train.get_dataset_shard("train")
+    val_ds = ray.train.get_dataset_shard("val")
     
-    # Define training arguments
-    training_args = TrainingArguments(
-        output_dir="./results",
+    if train_ds is None:
+        raise ValueError("Training dataset is None. Please provide a valid dataset.")
+    if val_ds is None:
+        choice = input("No validation dataset provided. Restart or continue? (r/c): ")
+        if choice.lower() == "r":
+            raise ValueError("Validation dataset is None. Please provide a valid dataset.")
+        elif choice.lower() == "c":
+            print("Continuing without validation dataset.")
+        val_ds = None
+        
+        
+    train_ds_iterable = train_ds.iter_torch_batches(
+        batch_size=batch_size,
+        collate_fn=collate_fn
+    )
+    
+    val_ds_iterable = val_ds.iter_torch_batches(
+        batch_size=batch_size,
+        collate_fn=collate_fn
+    )
+
+    print("max steps per epoch ", max_steps_per_epoch)
+    
+    args = TrainingArguments(
+        name=name,
         eval_strategy="epoch",
         save_strategy="epoch",
         logging_strategy="epoch",
         per_device_train_batch_size=batch_size,
-        per_device_eval_batch_size=batch_size*2,
+        per_device_eval_batch_size=batch_size,
         learning_rate=learning_rate,
         num_train_epochs=epochs,
         weight_decay=weight_decay,
-        warmup_ratio=0.1,
-        logging_dir="./logs",
-        load_best_model_at_end=True if val_dataset else False,
-        metric_for_best_model="f1" if val_dataset else None,
-        fp16=True,  # Mixed precision training
         push_to_hub=False,
-        disable_tqdm=True,  # Cleaner output in distributed environments
+        max_steps=max_steps_per_epoch, * epochs,
+        disable_tqdm=False,
+        no_cuda=not use_gpu,
         report_to="none",
     )
     
-    # Initialize the trainer
     trainer = Trainer(
         model=model,
-        args=training_args,
-        train_dataset=train_dataset,
-        val_dataset=val_dataset,
-        data_collator=data_collator,
-        compute_metrics=compute_metrics  # Add metrics computation
+        args=args,
+        train_dataset=train_ds_iterable,
+        eval_dataset=val_ds_iterable,
+        tokenizer=tokenizer,
+        compute_metrics=compute_metrics,
     )
     
-    # Add Ray reporting callback
-    trainer.add_callback(RayTrainReportCallback())
+    trainer.add_callback(RayTrainReportCallback)
+    trainer = prepare_trainer(trainer)
     
-    # Train the model
-    print("Starting training")
+    print("Starting training...")
     trainer.train()
-    
-    # Save model and tokenizer
-    model_path = "./sentiment_model"
-    model.save_pretrained(model_path)
-    tokenizer.save_pretrained(model_path)
-    
-    # Return results
-    if val_dataset:
-        eval_results = trainer.evaluate()
-        return eval_results
-    return {"status": "completed"}
+        
     
 def init_ray():
     """
@@ -230,19 +213,24 @@ def main():
         resources_per_worker=worker_resources
     )
     
+    batch_size = 16
+    num_workers = scaling_config.num_workers
+    
     # Hyperparameters
     hyperparameters = {
-        "batch_size": 16,
-        "num_workers": n_gpus if n_gpus > 0 else 1,
+        "batch_size": batch_size,
+        "num_workers": num_workers,
         "learning_rate": 2e-5,
         "epochs": 3,
+        "max_steps_per_epoch": train_dataset.count() // (batch_size * num_workers),  # Adjust as needed
         "weight_decay": 0.01
     }
 
     # Configure Ray Trainer
     config = {
-        'train': train_dataset, 
-        'val': val_dataset,
+        'name': "twitter-roberta-finetune",
+        'model_name': "cardiffnlp/twitter-roberta-base-sentiment",
+        'num_labels': 3,
         **hyperparameters
     }
     
@@ -252,7 +240,15 @@ def main():
     trainer = TorchTrainer(
         train_func, 
         scaling_config=scaling_config, 
+        datasets={"train": train_dataset, "eval": val_dataset},
         train_loop_config=config,
+        run_config=RunConfig(
+            checkpoint_config=CheckpointConfig(
+                num_to_keep=1,
+                checkpoint_score_attribute="accuracy",
+                checkpoint_score_order="max",
+            )
+        )
     )
     
     result = trainer.fit()
