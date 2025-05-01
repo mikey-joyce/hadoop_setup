@@ -27,8 +27,8 @@ import pyarrow.dataset as ds
 import torch
 import numpy as np
 
-# MODEL_NAME = "cardiffnlp/twitter-roberta-base-sentiment"
-# NUM_LABELS = 3
+MODEL_NAME = "cardiffnlp/twitter-roberta-base-sentiment"
+NUM_LABELS = 3
 
 # def parse_rdd(row_str):
 #     match = re.search(r"Row\(content='(.*?)', sentiment='(.*?)', UID='(.*?)'\)", row_str)
@@ -53,13 +53,7 @@ def collate_fn(batch, tokenizer):
     """
     
     if tokenizer is None:
-        print("Tokenizer is not provided. Use default? (default = cardiffnlp/twitter-roberta-base-sentiment)")
-        choice = input("Enter 'y' to use default, 'n' to exit: ")
-        if choice.lower() == 'y':
-            tokenizer = AutoTokenizer.from_pretrained("cardiffnlp/twitter-roberta-base-sentiment", use_fast=True)
-        elif choice.lower() == 'n':
-            print("Exiting...")
-            sys.exit(1)
+        raise ValueError("Tokenizer is not provided to collate function")
 
     outputs = tokenizer(
             list(batch["content"]),
@@ -67,11 +61,14 @@ def collate_fn(batch, tokenizer):
             padding="longest",
             return_tensors="pt",
             )
+    
 
+    seq_length = outputs["input_ids"].shape[1]
+    batch_size = outputs["input_ids"].shape[0]
+    
+    # create token_type_ids and labels
+    outputs["token_type_ids"] = torch.zeros((batch_size, seq_length), dtype=torch.long)
     outputs["labels"] = torch.tensor([int(label) for label in batch["sentiment"]])
-
-    if torch.cuda.is_available():
-        outputs = {k: v.cuda() for k, v in outputs.items()}
 
     return outputs
     
@@ -108,11 +105,7 @@ def train_func(config):
     if train_ds is None:
         raise ValueError("Training dataset is None. Please provide a valid dataset.")
     if val_ds is None:
-        choice = input("No validation dataset provided. Restart or continue? (r/c): ")
-        if choice.lower() == "r":
-            raise ValueError("Validation dataset is None. Please provide a valid dataset.")
-        elif choice.lower() == "c":
-            print("Continuing without validation dataset.")
+        print("No validation dataset provided. Continuing without validation dataset.")
         val_ds = None
         
     collate_with_tokenizer = partial(collate_fn, tokenizer=tokenizer)
@@ -143,12 +136,14 @@ def train_func(config):
         weight_decay=weight_decay,
         push_to_hub=False,
         max_steps=max_steps_per_epoch * epochs,
-        disable_tqdm=False,
+        disable_tqdm=True,
         no_cuda=not use_gpu,
         report_to="none",
         output_dir=f"./results/{name}_{current_time}",
         logging_dir=f"./logs/{name}_{current_time}",
         load_best_model_at_end=True if val_ds else False,
+        metric_for_best_model="accuracy" if val_ds else None,
+        greater_is_better=True if val_ds else False,
     )
     
     trainer = Trainer(
@@ -177,7 +172,7 @@ def init_ray():
     time.sleep(5)
 
     resources = ray.cluster_resources()
-    n_cpus = max(int(resources.get("CPU", 1)) - 1, 1) # Subtract 1 to leave one CPU for driver
+    n_cpus = int(resources.get("CPU", 1))
     n_gpus = int(resources.get("GPU", 0))
 
     return n_cpus, n_gpus
