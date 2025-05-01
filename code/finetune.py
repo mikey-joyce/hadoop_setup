@@ -6,6 +6,7 @@ import subprocess
 import os
 import json
 import datetime
+import logging
 
 from hadoop_setup import setup_hadoop_classpath
 from load_data import load_and_prepare_dataset
@@ -40,6 +41,13 @@ NUM_LABELS = 3
 now = datetime.datetime.now()
 current_time = now.strftime("%Y-%m-%d_%H-%M-%S")
 
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+    datefmt="%Y-%m-%d %H:%M:%S",
+)
+logger = logging.getLogger(__name__)
+
 def collate_fn(batch, tokenizer):
     """
     Process a batch of data for the model.
@@ -51,6 +59,7 @@ def collate_fn(batch, tokenizer):
     Returns:
         Dictionary with model inputs and labels
     """
+    
     
     if tokenizer is None:
         raise ValueError("Tokenizer is not provided to collate function")
@@ -74,16 +83,22 @@ def collate_fn(batch, tokenizer):
     outputs["labels"] = torch.tensor([int(float(label)) for label in batch["sentiment"]])
 
     return outputs
-    
+
 # def tokenize_function(examples, tokenizer):
 #     # print(f"Data keys:\n{examples.keys()}")
 #     # print(f"Content data type:\n{type(examples['content'][0])}")
 #     # print(f"Content data :\n{examples['content'][0]}")
 #     return tokenizer(examples['content'][0], truncation=True)
 
+# def tokenize_function(examples, tokenizer):
+#     # print(f"Data keys:\n{examples.keys()}")
+#     # print(f"Content data type:\n{type(examples['content'][0])}")
+#     # print(f"Content data :\n{examples['content'][0]}")
+#     return tokenizer(examples['content'][0], truncation=True)
+    
 def train_func(config):
     use_gpu = True if torch.cuda.is_available() else False
-    print(f"Is CUDA available: {use_gpu}")
+    logger.info(f"Is CUDA available: {use_gpu}")
     
     name = config.get("name", "twitter-roberta-finetune")
     model_name = config.get("model_name", "cardiffnlp/twitter-roberta-base-sentiment")
@@ -95,6 +110,8 @@ def train_func(config):
     weight_decay = config.get("weight_decay", 0.01)
     use_gpu = config.get("use_gpu", False)
     
+    logger.info("Loading model and tokenizer for %s", model_name)
+    
     metric = evaluate.load("accuracy")
     tokenizer = AutoTokenizer.from_pretrained(model_name, use_fast=True)
     model = AutoModelForSequenceClassification.from_pretrained(
@@ -102,32 +119,48 @@ def train_func(config):
         num_labels=num_labels
     )
     
+    logger.info("Model and tokenizer loaded successfully")
+    logger.info("Getting data shards")
+    
     train_ds = ray.train.get_dataset_shard("train")
     val_ds = ray.train.get_dataset_shard("val")
     
+    logger.info("Data shards obtained successfully")
+    logger.info("Train dataset size: %s", train_ds.count())
+    logger.info("Validation dataset size: %s", val_ds.count() if val_ds else "No validation dataset provided")
+    
     if train_ds is None:
+        logger.error("Training dataset is None. Please provide a valid dataset.")
         raise ValueError("Training dataset is None. Please provide a valid dataset.")
     if val_ds is None:
-        print("No validation dataset provided. Continuing without validation dataset.")
+        logger.warning("No validation dataset provided. Continuing without validation dataset.")
         val_ds = None
         
     collate_with_tokenizer = partial(collate_fn, tokenizer=tokenizer)
-
+    logger.info("Data collator created successfully")
+    
+    logger.info("Creating train iterable")
     train_ds_iterable = train_ds.iter_torch_batches(
         batch_size=batch_size,
         collate_fn=collate_with_tokenizer,
     )
+    logger.info("Train iterable created successfully")
+    logger.info(f"Sample batch: \n{next(iter(train_ds_iterable))}")
     
+    logger.info("Creating validation iterable")
     if val_ds is not None:
         val_ds_iterable = val_ds.iter_torch_batches(
             batch_size=batch_size,
             collate_fn=collate_with_tokenizer,
         )
+        logger.info("Validation iterable created successfully")
+        logger.info(f"Sample validation batch: \n{next(iter(val_ds_iterable))}")
     else:
         val_ds_iterable = None
 
-    print("max steps per epoch ", max_steps_per_epoch)
+    logger.info("max steps per epoch %s", max_steps_per_epoch)
     
+    logger.info("Obtaining args for Trainer")
     args = TrainingArguments(
         eval_strategy="epoch",
         save_strategy="epoch",
@@ -148,7 +181,9 @@ def train_func(config):
         metric_for_best_model="accuracy" if val_ds else None,
         greater_is_better=True if val_ds else False,
     )
+    logger.info("Training arguments obtained successfully")
     
+    logger.info("Creating Trainer")
     trainer = Trainer(
         model=model,
         args=args,
@@ -157,12 +192,16 @@ def train_func(config):
         tokenizer=tokenizer,
         compute_metrics=compute_metrics,
     )
+    logger.info("Trainer created successfully")
     
+    logger.info("Preparing Trainer")
     trainer.add_callback(RayTrainReportCallback)
     trainer = prepare_trainer(trainer)
+    logger.info("Trainer prepared successfully")
     
-    print("Starting training...")
+    logger.info("Starting training...")
     trainer.train()
+    logger.info("Training finished.")
         
     
 def init_ray():
@@ -270,7 +309,7 @@ def main():
     )
     
     result = trainer.fit()
-    print("Training completed with result: ", result)
+    logger.info("Training completed with result: %s", result)
     
     ray.shutdown()
 
