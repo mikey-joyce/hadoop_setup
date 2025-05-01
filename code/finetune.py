@@ -5,6 +5,7 @@ import sys
 import subprocess
 import os
 import json
+import datetime
 
 from hadoop_setup import setup_hadoop_classpath
 from load_data import load_and_prepare_dataset
@@ -36,6 +37,9 @@ import numpy as np
 #     else:
 #         return ("", "", "")
 
+now = datetime.datetime.now()
+current_time = now.strftime("%Y-%m-%d %H:%M:%S")
+
 def collate_fn(batch, tokenizer):
     """
     Process a batch of data for the model.
@@ -47,6 +51,15 @@ def collate_fn(batch, tokenizer):
     Returns:
         Dictionary with model inputs and labels
     """
+    
+    if tokenizer is None:
+        print("Tokenizer is not provided. Use default? (default = cardiffnlp/twitter-roberta-base-sentiment)")
+        choice = input("Enter 'y' to use default, 'n' to exit: ")
+        if choice.lower() == 'y':
+            tokenizer = AutoTokenizer.from_pretrained("cardiffnlp/twitter-roberta-base-sentiment", use_fast=True)
+        elif choice.lower() == 'n':
+            print("Exiting...")
+            sys.exit(1)
 
     outputs = tokenizer(
             list(batch["content"]),
@@ -102,21 +115,24 @@ def train_func(config):
             print("Continuing without validation dataset.")
         val_ds = None
         
-        
+    collate_with_tokenizer = partial(collate_fn, tokenizer=tokenizer)
+
     train_ds_iterable = train_ds.iter_torch_batches(
         batch_size=batch_size,
-        collate_fn=collate_fn
+        collate_fn=collate_with_tokenizer,
     )
     
-    val_ds_iterable = val_ds.iter_torch_batches(
-        batch_size=batch_size,
-        collate_fn=collate_fn
-    )
+    if val_ds is not None:
+        val_ds_iterable = val_ds.iter_torch_batches(
+            batch_size=batch_size,
+            collate_fn=collate_with_tokenizer,
+        )
+    else:
+        val_ds_iterable = None
 
     print("max steps per epoch ", max_steps_per_epoch)
     
     args = TrainingArguments(
-        name=name,
         eval_strategy="epoch",
         save_strategy="epoch",
         logging_strategy="epoch",
@@ -126,10 +142,13 @@ def train_func(config):
         num_train_epochs=epochs,
         weight_decay=weight_decay,
         push_to_hub=False,
-        max_steps=max_steps_per_epoch, * epochs,
+        max_steps=max_steps_per_epoch * epochs,
         disable_tqdm=False,
         no_cuda=not use_gpu,
         report_to="none",
+        output_dir=f"./results/{name}_{current_time}",
+        logging_dir=f"./logs/{name}_{current_time}",
+        load_best_model_at_end=True if val_ds else False,
     )
     
     trainer = Trainer(
@@ -253,6 +272,8 @@ def main():
     
     result = trainer.fit()
     print("Training completed with result: ", result)
+    
+    ray.shutdown()
 
 if __name__ == "__main__":
     main()
