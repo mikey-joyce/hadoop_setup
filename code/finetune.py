@@ -259,7 +259,7 @@ def main():
     trainer = TorchTrainer(
         train_func, 
         scaling_config=scaling_config, 
-        datasets={"train": train_dataset, "eval": val_dataset},
+        datasets={"train": train_dataset, "val": val_dataset},
         train_loop_config=config,
         run_config=RunConfig(
             name=config["name"],
