@@ -77,7 +77,7 @@ def collate_fn(batch, tokenizer):
     batch_size = outputs["input_ids"].shape[0]
     
     # create token_type_ids and labels
-    outputs["token_type_ids"] = torch.zeros((batch_size, seq_length), dtype=torch.long)
+    # outputs["token_type_ids"] = torch.zeros((batch_size, seq_length), dtype=torch.long)
 
     # Convert potentially float-like strings to float first, then to an integer
     outputs["labels"] = torch.tensor([int(float(label)) for label in batch["sentiment"]])
@@ -108,7 +108,6 @@ def train_func(config):
     learning_rate = config.get("learning_rate", 2e-5)
     epochs = config.get("epochs", 10)
     weight_decay = config.get("weight_decay", 0.01)
-    use_gpu = config.get("use_gpu", False)
     
     logger.info("Loading model and tokenizer for %s", model_name)
     
@@ -164,7 +163,8 @@ def train_func(config):
     args = TrainingArguments(
         eval_strategy="epoch",
         save_strategy="epoch",
-        logging_strategy="epoch",
+        logging_strategy="steps",
+        logging_steps=100,
         per_device_train_batch_size=batch_size,
         per_device_eval_batch_size=batch_size,
         learning_rate=learning_rate,
@@ -235,83 +235,106 @@ def display_training_config(training_config: dict, scaling_config: ScalingConfig
     print("==============================")
 
 def main():
-    # Setup Hadoop classpath via external function
-    setup_hadoop_classpath()
-
-    # Initialize Spark session
-    spark = SparkSession.builder.appName("ReadTrain").getOrCreate()
-
-    # Initialize Ray and get available resources
-    n_cpus, n_gpus = init_ray()
-
-    # Load, clean, and prepare dataset from HDFS
-    hdfs_path = "/phase2/data"
-    train_path = f"{hdfs_path}/train"
-    val_path = f"{hdfs_path}/valid_labels"
+    spark = None
+    ray_initialized = False
     
-    train_dataset = load_and_prepare_dataset(spark, train_path)
-    val_dataset = load_and_prepare_dataset(spark, val_path)
+    try:
+        # Setup Hadoop classpath via external function
+        setup_hadoop_classpath()
 
-    # Determine per-worker resource allocation
-    if n_gpus > 0:
-        num_workers = n_gpus
-        cpus_per_worker = 1
-        worker_resources = {"CPU": cpus_per_worker, "GPU": 1}
-    else:
-        num_workers = 1
-        cpus_per_worker = n_cpus
-        worker_resources = {"CPU": cpus_per_worker}
+        # Initialize Spark session
+        spark = SparkSession.builder.appName("ReadTrain").getOrCreate()
 
-    # Scaling config
-    scaling_config = ScalingConfig(
-        num_workers=num_workers,
-        use_gpu=bool(n_gpus),
-        resources_per_worker=worker_resources,
-    )
-    
-    batch_size = 16
-    num_workers = scaling_config.num_workers
-    
-    # Hyperparameters
-    hyperparameters = {
-        "batch_size": batch_size,
-        "num_workers": num_workers,
-        "learning_rate": 2e-5,
-        "epochs": 3,
-        "max_steps_per_epoch": train_dataset.count() // (batch_size * num_workers),  # Adjust as needed
-        "weight_decay": 0.01
-    }
+        # Initialize Ray and get available resources
+        try:
+            n_cpus, n_gpus = init_ray()
+            ray_initialized = True
+            logger.info("Ray initialized successfully with %d CPUs and %d GPUs", n_cpus, n_gpus)
+        except Exception as e:
+            logger.error("Ray initialization failed: %s", e)
+            sys.exit(1)
+            
 
-    # Configure Ray Trainer
-    config = {
-        'name': "twitter-roberta-finetune",
-        'model_name': "cardiffnlp/twitter-roberta-base-sentiment",
-        'num_labels': 3,
-        **hyperparameters
-    }
-    
-    # Display training configuration including per-worker resources before training starts
-    display_training_config(hyperparameters, scaling_config)
+        # Load, clean, and prepare dataset from HDFS
+        hdfs_path = "/phase2/data"
+        train_path = f"{hdfs_path}/train"
+        val_path = f"{hdfs_path}/valid_labels"
+        
+        train_dataset = load_and_prepare_dataset(spark, train_path)
+        val_dataset = load_and_prepare_dataset(spark, val_path)
 
-    trainer = TorchTrainer(
-        train_func, 
-        scaling_config=scaling_config, 
-        datasets={"train": train_dataset, "val": val_dataset},
-        train_loop_config=config,
-        run_config=RunConfig(
-            name=config["name"],
-            checkpoint_config=CheckpointConfig(
-                num_to_keep=2,
-                checkpoint_score_attribute="accuracy",
-                checkpoint_score_order="max",
+        # Determine per-worker resource allocation
+        if n_gpus > 0:
+            num_workers = n_gpus
+            cpus_per_worker = 1
+            worker_resources = {"CPU": cpus_per_worker, "GPU": 1}
+        else:
+            num_workers = 1
+            cpus_per_worker = n_cpus
+            worker_resources = {"CPU": cpus_per_worker}
+
+        # Scaling config
+        scaling_config = ScalingConfig(
+            num_workers=num_workers,
+            use_gpu=bool(n_gpus),
+            resources_per_worker=worker_resources,
+        )
+        
+        batch_size = 16
+        num_workers = scaling_config.num_workers
+        
+        # Hyperparameters
+        hyperparameters = {
+            "batch_size": batch_size,
+            "num_workers": num_workers,
+            "learning_rate": 2e-5,
+            "epochs": 3,
+            "max_steps_per_epoch": train_dataset.count() // (batch_size * num_workers),  # Adjust as needed
+            "weight_decay": 0.01
+        }
+
+        # Configure Ray Trainer
+        config = {
+            'name': "twitter-roberta-finetune",
+            'model_name': "cardiffnlp/twitter-roberta-base-sentiment",
+            'num_labels': 3,
+            **hyperparameters
+        }
+        
+        # Display training configuration including per-worker resources before training starts
+        display_training_config(hyperparameters, scaling_config)
+
+        trainer = TorchTrainer(
+            train_func, 
+            scaling_config=scaling_config, 
+            datasets={"train": train_dataset, "val": val_dataset},
+            train_loop_config=config,
+            run_config=RunConfig(
+                name=config["name"],
+                checkpoint_config=CheckpointConfig(
+                    num_to_keep=2,
+                    checkpoint_score_attribute="accuracy",
+                    checkpoint_score_order="max",
+                )
             )
         )
-    )
-    
-    result = trainer.fit()
-    logger.info("Training completed with result: %s", result)
-    
-    ray.shutdown()
-
+        
+        result = trainer.fit()
+        logger.info("Training completed with result: %s", result)
+        
+    except KeyboardInterrupt:
+        logger.info("Training interrupted by user.")
+    except Exception as e:
+        logger.error("An error occurred: %s", exc_info=True)
+    finally:
+        if spark is not None:
+            logger.info("Stopping Spark session.")
+            spark.stop()
+        if ray_initialized and ray.is_initialized():
+            logger.info("Shutting down Ray.")
+            ray.shutdown()
+            
+        logger.info("Exiting program.")
+        
 if __name__ == "__main__":
     main()
