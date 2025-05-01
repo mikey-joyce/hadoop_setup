@@ -38,7 +38,7 @@ import numpy as np
 #         return ("", "", "")
 
 now = datetime.datetime.now()
-current_time = now.strftime("%Y-%m-%d %H:%M:%S")
+current_time = now.strftime("%Y-%m-%d_%H-%M-%S")
 
 def collate_fn(batch, tokenizer):
     """
@@ -262,8 +262,9 @@ def main():
         datasets={"train": train_dataset, "eval": val_dataset},
         train_loop_config=config,
         run_config=RunConfig(
+            name=config["name"],
             checkpoint_config=CheckpointConfig(
-                num_to_keep=1,
+                num_to_keep=2,
                 checkpoint_score_attribute="accuracy",
                 checkpoint_score_order="max",
             )

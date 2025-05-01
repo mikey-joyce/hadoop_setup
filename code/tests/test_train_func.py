@@ -38,7 +38,7 @@ import numpy as np
 # NUM_LABELS = 3
 
 now = datetime.datetime.now()
-current_time = now.strftime("%Y-%m-%d %H:%M:%S")
+current_time = now.strftime("%Y-%m-%d_%H-%M-%S")
 
 def compute_metrics(eval_pred, metric_name="accuracy"):
     predictions, labels = eval_pred
@@ -255,11 +255,12 @@ def main():
         datasets={"train": train_dataset, "val": val_dataset},
         train_loop_config=config,
         run_config=RunConfig(
+            name=config["name"],
             checkpoint_config=CheckpointConfig(
-                num_to_keep=1,
+                num_to_keep=2,
                 checkpoint_score_attribute="accuracy",
                 checkpoint_score_order="max",
-            )
+            ),
         )
     )
     
