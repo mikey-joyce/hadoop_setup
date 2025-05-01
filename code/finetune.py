@@ -212,19 +212,19 @@ def main():
 
     # Determine per-worker resource allocation
     if n_gpus > 0:
-        if n_gpus > n_cpus:
-            cpus_per_worker = 1  # Ensure each GPU worker gets at least 1 CPU
-        else:
-            cpus_per_worker = n_cpus // n_gpus  # Use integer division for clarity
+        num_workers = n_gpus
+        cpus_per_worker = max(1, n_cpus // num_workers)
         worker_resources = {"CPU": cpus_per_worker, "GPU": 1}
     else:
-        worker_resources = {"CPU": n_cpus}
+        num_workers = 1
+        cpus_per_worker = n_cpus
+        worker_resources = {"CPU": cpus_per_worker}
 
     # Scaling config
     scaling_config = ScalingConfig(
-        num_workers=n_gpus if n_gpus > 0 else 1,
+        num_workers=num_workers,
         use_gpu=bool(n_gpus),
-        resources_per_worker=worker_resources
+        resources_per_worker=worker_resources,
     )
     
     batch_size = 16
