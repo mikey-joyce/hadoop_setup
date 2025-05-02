@@ -270,7 +270,7 @@ def main():
             "batch_size": batch_size,
             "num_workers": num_workers,
             "learning_rate": 2e-5,
-            "epochs": 3,
+            "epochs": 7,
             "max_steps_per_epoch": train_dataset.count() // (batch_size * num_workers),  # Adjust as needed
             "weight_decay": 0.01
         }

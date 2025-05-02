@@ -40,13 +40,23 @@ import numpy as np
 now = datetime.datetime.now()
 current_time = now.strftime("%Y-%m-%d_%H-%M-%S")
 
-def compute_metrics(eval_pred, metric_name="accuracy"):
-    predictions, labels = eval_pred
-    predictions = np.argmax(predictions, axis=1)
-    accuracy_metric = evaluate.load(metric_name)
-    accuracy = accuracy_metric.compute(predictions=predictions, references=labels)
+def compute_f1_accuracy(eval_pred):
+    """
+    Compute F1 and accuracy metrics.
+    """
+    f1_metric = evaluate.load("f1")
+    accuracy_metric = evaluate.load("accuracy")
     
-    return accuracy
+    logits, labels = eval_pred
+    predictions = np.argmax(logits, axis=1)
+    
+    f1: dict[str, float] = f1_metric.compute(predictions=predictions, references=labels, average="weighted")
+    accuracy: dict[str, float] = accuracy_metric.compute(predictions=predictions, references=labels)
+    
+    return {
+        "f1": f1["f1"],
+        "accuracy": accuracy["accuracy"]
+    }
 
 def collate_fn(batch, tokenizer):
     """
@@ -95,49 +105,63 @@ def train_func(config):
     learning_rate = config.get("learning_rate", 2e-5)
     epochs = config.get("epochs", 10)
     weight_decay = config.get("weight_decay", 0.01)
-    use_gpu = config.get("use_gpu", False)
     
-    metric = evaluate.load("accuracy")
+    print("Loading model and tokenizer for %s", model_name)
+    
+    # metric = evaluate.load("accuracy")
     tokenizer = AutoTokenizer.from_pretrained(model_name, use_fast=True)
     model = AutoModelForSequenceClassification.from_pretrained(
         model_name,
         num_labels=num_labels
     )
     
+    print("Model and tokenizer loaded successfully")
+    print("Getting data shards")
+    
     train_ds = ray.train.get_dataset_shard("train")
     val_ds = ray.train.get_dataset_shard("val")
     
+    print("Data shards obtained successfully")
+    print(train_ds)
+    print(val_ds if val_ds else "No validation dataset provided")
+    
     if train_ds is None:
+        print("Training dataset is None. Please provide a valid dataset.")
         raise ValueError("Training dataset is None. Please provide a valid dataset.")
     if val_ds is None:
-        choice = input("No validation dataset provided. Restart or continue? (r/c): ")
-        if choice.lower() == "r":
-            raise ValueError("Validation dataset is None. Please provide a valid dataset.")
-        elif choice.lower() == "c":
-            print("Continuing without validation dataset.")
+        print("No validation dataset provided. Continuing without validation dataset.")
         val_ds = None
         
     collate_with_tokenizer = partial(collate_fn, tokenizer=tokenizer)
-
+    print("Data collator created successfully")
+    
+    print("Creating train iterable")
     train_ds_iterable = train_ds.iter_torch_batches(
         batch_size=batch_size,
         collate_fn=collate_with_tokenizer,
     )
+    print("Train iterable created successfully")
+    print(f"Sample batch: \n{next(iter(train_ds_iterable))}")
     
+    print("Creating validation iterable")
     if val_ds is not None:
         val_ds_iterable = val_ds.iter_torch_batches(
             batch_size=batch_size,
             collate_fn=collate_with_tokenizer,
         )
+        print("Validation iterable created successfully")
+        print(f"Sample validation batch: \n{next(iter(val_ds_iterable))}")
     else:
         val_ds_iterable = None
 
-    print("max steps per epoch ", max_steps_per_epoch)
+    print("max steps per epoch %s", max_steps_per_epoch)
     
+    print("Obtaining args for Trainer")
     args = TrainingArguments(
         eval_strategy="epoch",
         save_strategy="epoch",
-        logging_strategy="epoch",
+        logging_strategy="steps",
+        logging_steps=100,
         per_device_train_batch_size=batch_size,
         per_device_eval_batch_size=batch_size,
         learning_rate=learning_rate,
@@ -145,28 +169,37 @@ def train_func(config):
         weight_decay=weight_decay,
         push_to_hub=False,
         max_steps=max_steps_per_epoch * epochs,
-        disable_tqdm=False,
+        disable_tqdm=True,
         no_cuda=not use_gpu,
         report_to="none",
         output_dir=f"./results/{name}_{current_time}",
         logging_dir=f"./logs/{name}_{current_time}",
         load_best_model_at_end=True if val_ds else False,
+        metric_for_best_model="f1" if val_ds else None,
+        greater_is_better=True if val_ds else False,
+        fp16=True,
     )
+    print("Training arguments obtained successfully")
     
+    print("Creating Trainer")
     trainer = Trainer(
         model=model,
         args=args,
         train_dataset=train_ds_iterable,
         eval_dataset=val_ds_iterable,
         tokenizer=tokenizer,
-        compute_metrics=compute_metrics,
+        compute_metrics=compute_f1_accuracy,
     )
+    print("Trainer created successfully")
     
+    print("Preparing Trainer")
     trainer.add_callback(RayTrainReportCallback)
     trainer = prepare_trainer(trainer)
+    print("Trainer prepared successfully")
     
     print("Starting training...")
     trainer.train()
+    print("Training finished.")
 
 
 def init_ray():
