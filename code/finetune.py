@@ -123,6 +123,7 @@ def train_func(config):
     train_ds_iterable = train_ds.iter_torch_batches(
         batch_size=batch_size,
         collate_fn=collate_with_tokenizer,
+        local_shuffle_buffer_size=batch_size * 10,
     )
     print("Train iterable created successfully")
     print(f"Sample batch: \n{next(iter(train_ds_iterable))}")
