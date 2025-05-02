@@ -280,23 +280,26 @@ def main():
     
     # Initialize Ray
     ray.init(ignore_reinit_error=True)
-    
-    # Configure TorchTrainer to run the training pipeline from finetune.py
+
+    # Create a TorchTrainer instance
     trainer = TorchTrainer(
-        train_func,
-        scaling_config=scaling_config,
+        train_func, 
+        scaling_config=scaling_config, 
         datasets={"train": train_dataset, "val": val_dataset},
         train_loop_config=config,
         run_config=RunConfig(
             name=config["name"],
             checkpoint_config=CheckpointConfig(
                 num_to_keep=2,
-                checkpoint_score_attribute="accuracy",
+                checkpoint_score_attribute="eval_f1",
                 checkpoint_score_order="max",
-            ),
+            )
         )
     )
     
+    # Start the training process
+    result = trainer.fit()  
+      
     print("Starting test training using TorchTrainer and functions from finetune.py...")
     result = trainer.fit()
     print("Test training completed with result:", result)

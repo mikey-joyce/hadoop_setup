@@ -162,7 +162,7 @@ def train_func(config):
         load_best_model_at_end=True if val_ds else False,
         metric_for_best_model="f1" if val_ds else None,
         greater_is_better=True if val_ds else False,
-        fp16=True,
+        
     )
     print("Training arguments obtained successfully")
     
@@ -296,7 +296,7 @@ def main():
                 name=config["name"],
                 checkpoint_config=CheckpointConfig(
                     num_to_keep=2,
-                    checkpoint_score_attribute="accuracy",
+                    checkpoint_score_attribute="eval_f1",
                     checkpoint_score_order="max",
                 )
             )
