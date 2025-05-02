@@ -172,7 +172,7 @@ def train_func(config):
         args=args,
         train_dataset=train_ds_iterable,
         eval_dataset=val_ds_iterable,
-        tokenizer=tokenizer,
+        processing_class=tokenizer,
         compute_metrics=compute_f1_accuracy,
     )
     print("Trainer created successfully")
