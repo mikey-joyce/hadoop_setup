@@ -2,46 +2,32 @@ import numpy as np
 import evaluate
 import ray.data as rd
 
-def compute_metrics(eval_pred, metric_name="accuracy"):
-    predictions, labels = eval_pred
-    predictions = np.argmax(predictions, axis=1)
-    accuracy_metric = evaluate.load(metric_name)
-    accuracy = accuracy_metric.compute(predictions=predictions, references=labels)
+
+def compute_metric(eval_pred, metric="f1") -> dict[str, int]:
+    metric = evaluate.load(metric)
+    logits, labels = eval_pred
+    predictions = np.argmax(logits, axis=1)
     
-    return accuracy
+    return metric.compute(predictions=predictions, references=labels, average="weighted")
 
-def compute_multiple_metrics(eval_pred) -> dict[str, int]:
+def compute_f1_accuracy(eval_pred):
     """
-    Calculate evaluation metrics based on predictions and labels.
-
-    Args:
-        eval_pred: Tuple of (predictions, labels)
-
-    Returns:
-        Dictionary of metric names and values
+    Compute F1 and accuracy metrics.
     """
-    predictions, labels = eval_pred
-    predictions = np.argmax(predictions, axis=1)
-
-    # Load multiple metrics for comprehensive evaluation
+    f1_metric = evaluate.load("f1")
     accuracy_metric = evaluate.load("accuracy")
-    f1_metric = evaluate.load("f1", "multiclass")
-    precision_metric = evaluate.load("precision", "multiclass")
-    recall_metric = evaluate.load("recall", "multiclass")
-
-    # Calculate each metric
-    accuracy = accuracy_metric.compute(predictions=predictions, references=labels)
-    f1 = f1_metric.compute(predictions=predictions, references=labels, average="weighted", num_classes=len(np.unique(labels)))
-    precision = precision_metric.compute(predictions=predictions, references=labels, average="weighted", num_classes=len(np.unique(labels)))
-    recall = recall_metric.compute(predictions=predictions, references=labels, average="weighted", num_classes=len(np.unique(labels)))
-
-    # Combine all metrics
+    
+    logits, labels = eval_pred
+    predictions = np.argmax(logits, axis=1)
+    
+    f1: dict[str, float] = f1_metric.compute(predictions=predictions, references=labels, average="weighted")
+    accuracy: dict[str, float] = accuracy_metric.compute(predictions=predictions, references=labels)
+    
     return {
-        "accuracy": accuracy["accuracy"],
         "f1": f1["f1"],
-        "precision": precision["precision"],
-        "recall": recall["recall"]
+        "accuracy": accuracy["accuracy"]
     }
+
 
 def count_unique_labels(dataset: rd.Dataset, label_column="sentiment"):
     """
