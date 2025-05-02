@@ -6,7 +6,7 @@ import subprocess
 import os
 import json
 import datetime
-import logging
+import argparse
 
 from hadoop_setup import setup_hadoop_classpath
 from load_data import load_and_prepare_dataset
@@ -123,7 +123,7 @@ def train_func(config):
     train_ds_iterable = train_ds.iter_torch_batches(
         batch_size=batch_size,
         collate_fn=collate_with_tokenizer,
-        local_shuffle_buffer_size=batch_size * 10,
+        local_shuffle_buffer_size=batch_size * 20,
     )
     print("Train iterable created successfully")
     print(f"Sample batch: \n{next(iter(train_ds_iterable))}")
@@ -218,6 +218,10 @@ def display_training_config(training_config: dict, scaling_config: ScalingConfig
     print("==============================")
 
 def main():
+    parser = argparse.ArgumentParser(description="Ray Train Finetune Script")
+    parser.add_argument("-gs", "--global_shuffle", action="store_true", help="Enable global shuffle")
+    args = parser.parse_args()
+    
     spark = None
     ray_initialized = False
     
@@ -245,6 +249,11 @@ def main():
         
         train_dataset = load_and_prepare_dataset(spark, train_path)
         val_dataset = load_and_prepare_dataset(spark, val_path)
+        
+        if args.global_shuffle:
+            print("Global shuffle enabled. Shuffling datasets...")
+            train_dataset = train_dataset.random_shuffle()
+            val_dataset = val_dataset.random_shuffle()
 
         # Determine per-worker resource allocation
         if n_gpus > 0:
