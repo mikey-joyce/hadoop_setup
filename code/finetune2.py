@@ -135,7 +135,7 @@ def main():
     except KeyboardInterrupt:
         print("Training interrupted by user.")
     except Exception as e:
-        print("An error occurred: %s", exc_info=True)
+        print("An error occurred: %s", e)
     finally:
         if spark is not None:
             print("Stopping Spark session.")
