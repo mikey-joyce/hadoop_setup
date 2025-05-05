@@ -172,7 +172,7 @@ def train_func(config):
         args=args,
         train_dataset=train_ds_iterable,
         eval_dataset=val_ds_iterable,
-        processing_class=tokenizer,
+        tokenizer=tokenizer,
         compute_metrics=compute_f1_accuracy,
     )
     print("Trainer created successfully")
@@ -183,7 +183,7 @@ def train_func(config):
     print("Trainer prepared successfully")
     
     print("Starting training...")
-    trainer.train(resume_from_checkpoint=True)
+    trainer.train()
     print("Training finished.")
         
     
