@@ -183,7 +183,7 @@ def train_func(config):
     print("Trainer prepared successfully")
     
     print("Starting training...")
-    trainer.train()
+    trainer.train(resume_from_checkpoint=True)
     print("Training finished.")
         
     
