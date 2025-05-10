@@ -12,12 +12,14 @@ from hadoop_setup import setup_hadoop_classpath
 
 from transformers import AutoModelForSequenceClassification, AutoTokenizer
 from datasets import Dataset, load_dataset, logging
+from sklearn.metrics import ConfusionMatrixDisplay
 
 import torch
 import multiprocessing as mp
 import evaluate
 import matplotlib.pyplot as plt
 import os
+import pandas as pd
 
 logging.disable_progress_bar()
 PRETRAINED_MODEL_NAME = "cardiffnlp/twitter-roberta-base-sentiment"
@@ -99,25 +101,28 @@ def comparison(pretrained_model, finetuned_model, dataset: Dataset, tokenizer, o
     
     return results_pretrained, results_finetuned
 
-def plot_cm(cm_output, title: str = "Confusion Matrix") -> plt.Figure:
+def plot_cm(
+    y_true: list[int],
+    y_pred: list[int],
+    labels: list[int] = [0,1,2],
+    normalize: str | None = None,   # "true", "pred", or None
+    title: str = "Confusion Matrix"
+) -> plt.Figure:
     """
-    Plots an N×N confusion matrix from HF Evaluate's output.
-    cm_output: {"confusion_matrix": List[List[int]], "labels": List[int]}
+    Uses sklearn’s ConfusionMatrixDisplay to plot & return the figure.
+    normalize: {None, 'true', 'pred'}
     """
-    cm = cm_output["confusion_matrix"]
-    labels = cm_output.get('labels', list(range(len(cm))))
-    fig, ax = plt.subplots()
-    im = ax.imshow(cm, cmap=plt.cm.Blues)
-    ax.set_xticks(range(len(labels))); ax.set_xticklabels(labels)
-    ax.set_yticks(range(len(labels))); ax.set_yticklabels(labels)
-    ax.set_xlabel("Predicted"); ax.set_ylabel("True")
-    ax.set_title(title)
-    for i in range(len(labels)):
-        for j in range(len(labels)):
-            ax.text(j, i, cm[i][j], ha="center", va="center")
-    fig.colorbar(im, ax=ax)
-    
-    return fig    
+    disp = ConfusionMatrixDisplay.from_predictions(
+        y_true,
+        y_pred,
+        display_labels=labels,
+        normalize=normalize,
+        cmap=plt.cm.Blues,
+        colorbar=True
+    )
+    disp.ax_.set_title(title)
+    fig = disp.figure_
+    return fig 
     
 
 def main():
@@ -167,13 +172,25 @@ def main():
         batch_size=64
     )
     
-    # plot confusion matrix
-    cm_metric = evaluate.load("confusion_matrix")   
-    cm_results_pretrained = cm_metric.compute(predictions=results_pretrained['y_pred'], references=results_pretrained['y_true'], labels=[0,1,2])
-    cm_results_finetuned= cm_metric.compute(predictions=results_finetuned['y_pred'], references=results_finetuned['y_true'], labels=[0,1,2])
+    # save predictions and labels
+    df_pretrained = pd.DataFrame(
+        {
+            "y_true": results_pretrained['y_true'],
+            "y_pred": results_pretrained['y_pred']
+        }
+    )
+    df_finetined = pd.DataFrame(
+        {
+            "y_true": results_finetuned['y_true'],
+            "y_pred": results_finetuned['y_pred']
+        }
+    )
+    df_pretrained.to_parquet(output_dir + "/pretrained_preds.parquet", index=False)
+    df_finetined.to_parquet(output_dir + "/finetuned_preds.parquet", index=False)
     
-    cm_pretrained = plot_cm(cm_results_pretrained, "Pretrained model CM")
-    cm_finetuned = plot_cm(cm_results_finetuned, "Finetuned model CM")
+    # plot confusion matrix    
+    cm_pretrained = plot_cm(results_pretrained['y_true'], results_pretrained['y_red'], labels=[0,1,2], title="Pretrained model CM")
+    cm_finetuned = plot_cm(results_finetuned['y_true'], results_finetuned['y_red'], labels=[0,1,2], title="finetuned model CM")
     
     # Save confusion matrix
     cm_pretrained.savefig(output_dir + "/pretrained.png")
