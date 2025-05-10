@@ -10,6 +10,7 @@ python3 -m pip install --upgrade pip
 # Install Ray 2.5.0
 # install stuff we need for transformers and other stuffs
 pip install "ray[default,train,air]==2.5.0" --force-reinstall
+pip install raydp
 pip install "transformers[torch]" datasets accelerate evaluate scikit-learn --force-reinstall
 
 pip install top2vec

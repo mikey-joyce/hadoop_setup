@@ -1,3 +1,12 @@
+"""
+This script tests the entire training pipeline defined in finetune.py.
+It mimics the logic in finetune.py's main() function by creating dummy Ray datasets,
+setting up a dummy scaling configuration, and launching a TorchTrainer to run a brief training run.
+The dummy data uses three sentiment labels:
+    0 -> Negative sentiment
+    1 -> Neutral sentiment
+    2 -> Positive sentiment
+"""
 from functools import partial
 import re
 import time
@@ -6,11 +15,6 @@ import subprocess
 import os
 import json
 import datetime
-import argparse
-
-from hadoop_setup import setup_hadoop_classpath
-from load_data import load_and_prepare_dataset
-from eval import compute_metric, compute_f1_accuracy
 
 from pyspark.sql import SparkSession
 import pyspark.pandas as ps
@@ -28,18 +32,31 @@ import pyarrow.dataset as ds
 import torch
 import numpy as np
 
-MODEL_NAME = "cardiffnlp/twitter-roberta-base-sentiment"
-NUM_LABELS = 3
-
-# def parse_rdd(row_str):
-#     match = re.search(r"Row\(content='(.*?)', sentiment='(.*?)', UID='(.*?)'\)", row_str)
-#     if match:
-#         return (match.group(1), match.group(2), match.group(3))
-#     else:
-#         return ("", "", "")
+# MODEL = "cardiffnlp/twitter-roberta-base-sentiment"
+# TOKENIZER = AutoTokenizer.from_pretrained(MODEL, use_fast=True)
+# BATCH_SIZE = 16
+# NUM_LABELS = 3
 
 now = datetime.datetime.now()
 current_time = now.strftime("%Y-%m-%d_%H-%M-%S")
+
+def compute_f1_accuracy(eval_pred):
+    """
+    Compute F1 and accuracy metrics.
+    """
+    f1_metric = evaluate.load("f1")
+    accuracy_metric = evaluate.load("accuracy")
+    
+    logits, labels = eval_pred
+    predictions = np.argmax(logits, axis=1)
+    
+    f1: dict[str, float] = f1_metric.compute(predictions=predictions, references=labels, average="weighted")
+    accuracy: dict[str, float] = accuracy_metric.compute(predictions=predictions, references=labels)
+    
+    return {
+        "f1": f1["f1"],
+        "accuracy": accuracy["accuracy"]
+    }
 
 def collate_fn(batch, tokenizer):
     """
@@ -53,30 +70,29 @@ def collate_fn(batch, tokenizer):
         Dictionary with model inputs and labels
     """
     
-    
     if tokenizer is None:
-        raise ValueError("Tokenizer is not provided to collate function")
+        print("Tokenizer is not provided. Use default? (default = cardiffnlp/twitter-roberta-base-sentiment)")
+        choice = input("Enter 'y' to use default, 'n' to exit: ")
+        if choice.lower() == 'y':
+            tokenizer = AutoTokenizer.from_pretrained("cardiffnlp/twitter-roberta-base-sentiment", use_fast=True)
+        elif choice.lower() == 'n':
+            print("Exiting...")
+            sys.exit(1)
 
     outputs = tokenizer(
             list(batch["content"]),
             truncation=True,
             padding="longest",
-            max_length=512,
             return_tensors="pt",
             )
-    
 
-    seq_length = outputs["input_ids"].shape[1]
-    batch_size = outputs["input_ids"].shape[0]
-    
-    # create token_type_ids and labels
-    # outputs["token_type_ids"] = torch.zeros((batch_size, seq_length), dtype=torch.long)
+    outputs["labels"] = torch.tensor([int(label) for label in batch["sentiment"]])
 
-    # Convert potentially float-like strings to float first, then to an integer
-    outputs["labels"] = torch.tensor([int(float(label)) for label in batch["sentiment"]])
+    if torch.cuda.is_available():
+        outputs = {k: v.cuda() for k, v in outputs.items()}
 
     return outputs
-    
+
 def train_func(config):
     use_gpu = True if torch.cuda.is_available() else False
     print(f"Is CUDA available: {use_gpu}")
@@ -123,7 +139,6 @@ def train_func(config):
     train_ds_iterable = train_ds.iter_torch_batches(
         batch_size=batch_size,
         collate_fn=collate_with_tokenizer,
-        local_shuffle_buffer_size=batch_size * 20,
     )
     print("Train iterable created successfully")
     print(f"Sample batch: \n{next(iter(train_ds_iterable))}")
@@ -162,7 +177,7 @@ def train_func(config):
         load_best_model_at_end=True if val_ds else False,
         metric_for_best_model="f1" if val_ds else None,
         greater_is_better=True if val_ds else False,
-        
+        fp16=True,
     )
     print("Training arguments obtained successfully")
     
@@ -185,8 +200,8 @@ def train_func(config):
     print("Starting training...")
     trainer.train()
     print("Training finished.")
-        
-    
+
+
 def init_ray():
     """
     Initializes Ray and returns available CPU and GPU counts.
@@ -197,7 +212,7 @@ def init_ray():
     time.sleep(5)
 
     resources = ray.cluster_resources()
-    n_cpus = int(resources.get("CPU", 1))
+    n_cpus = max(int(resources.get("CPU", 1)) - 1, 1) # Subtract 1 to leave one CPU for driver
     n_gpus = int(resources.get("GPU", 0))
 
     return n_cpus, n_gpus
@@ -217,116 +232,79 @@ def display_training_config(training_config: dict, scaling_config: ScalingConfig
     print(json.dumps(scaling_config.resources_per_worker, indent=4))
     print("==============================")
 
+
+
 def main():
-    parser = argparse.ArgumentParser(description="Ray Train Finetune Script")
-    parser.add_argument("-gs", "--global_shuffle", action="store_true", help="Enable global shuffle")
-    args = parser.parse_args()
+    # Create dummy training and validation Ray datasets using a list of dictionaries.
+    data = [
+        {"content": "I hate this!", "sentiment": "0"},       # Negative sentiment
+        {"content": "It is okay.", "sentiment": "1"},          # Neutral sentiment
+        {"content": "I love this!", "sentiment": "2"},         # Positive sentiment
+        {"content": "Not my favorite.", "sentiment": "0"},       # Negative sentiment
+        {"content": "Could be better.", "sentiment": "1"},       # Neutral sentiment
+        {"content": "Absolutely fantastic!", "sentiment": "2"},  # Positive sentiment
+    ]
+    train_dataset = rd.from_items(data)
+    val_dataset = rd.from_items(data)
     
-    spark = None
-    ray_initialized = False
+    # Define hyperparameters (using the same names as in finetune.py)
+    batch_size = 2
+    num_workers = 1
+    hyperparameters = {
+        "batch_size": batch_size,
+        "epochs": 3,
+        "learning_rate": 1e-5,
+        "weight_decay": 0.01,
+        # Set max_steps_per_epoch based on the dummy dataset's count
+        "max_steps_per_epoch": train_dataset.count() // (batch_size * num_workers)
+    }
     
-    try:
-        # Setup Hadoop classpath via external function
-        setup_hadoop_classpath()
+    # Prepare scaling configuration for TorchTrainer (dummy values for testing)
+    scaling_config = ScalingConfig(
+        num_workers=num_workers,
+        use_gpu=False,
+        resources_per_worker={"CPU": 1}
+    )
+    
+    # Display the training configuration for inspection
+    display_training_config(hyperparameters, scaling_config)
+    
+    # Prepare the training configuration for the training function in finetune.py
+    config = {
+        'name': "twitter-roberta-finetune-test",
+        'model_name': "cardiffnlp/twitter-roberta-base-sentiment",
+        'num_labels': 3,
+        **hyperparameters,
+        "use_gpu": False
+    }
+    
+    # Initialize Ray
+    ray.init(ignore_reinit_error=True)
 
-        # Initialize Spark session
-        spark = SparkSession.builder.appName("ReadTrain").getOrCreate()
-
-        # Initialize Ray and get available resources
-        try:
-            n_cpus, n_gpus = init_ray()
-            ray_initialized = True
-            print("Ray initialized successfully with %d CPUs and %d GPUs", n_cpus, n_gpus)
-        except Exception as e:
-            print("Ray initialization failed: %s", e)
-            sys.exit(1)
-            
-
-        # Load, clean, and prepare dataset from HDFS
-        hdfs_path = "/phase2/data"
-        train_path = f"{hdfs_path}/train"
-        val_path = f"{hdfs_path}/valid_labels"
-        
-        train_dataset = load_and_prepare_dataset(spark, train_path)
-        val_dataset = load_and_prepare_dataset(spark, val_path)
-        
-        if args.global_shuffle:
-            print("Global shuffle enabled. Shuffling datasets...")
-            train_dataset = train_dataset.random_shuffle()
-            val_dataset = val_dataset.random_shuffle()
-
-        # Determine per-worker resource allocation
-        if n_gpus > 0:
-            num_workers = n_gpus
-            cpus_per_worker = 1
-            worker_resources = {"CPU": cpus_per_worker, "GPU": 1}
-        else:
-            num_workers = 1
-            cpus_per_worker = n_cpus
-            worker_resources = {"CPU": cpus_per_worker}
-
-        # Scaling config
-        scaling_config = ScalingConfig(
-            num_workers=num_workers,
-            use_gpu=bool(n_gpus),
-            resources_per_worker=worker_resources,
-        )
-        
-        batch_size = 16
-        num_workers = scaling_config.num_workers
-        
-        # Hyperparameters
-        hyperparameters = {
-            "batch_size": batch_size,
-            "num_workers": num_workers,
-            "learning_rate": 2e-5,
-            "epochs": 7,
-            "max_steps_per_epoch": train_dataset.count() // (batch_size * num_workers),  # Adjust as needed
-            "weight_decay": 0.01
-        }
-
-        # Configure Ray Trainer
-        config = {
-            'name': "twitter-roberta-finetune",
-            'model_name': "cardiffnlp/twitter-roberta-base-sentiment",
-            'num_labels': 3,
-            **hyperparameters
-        }
-        
-        # Display training configuration including per-worker resources before training starts
-        display_training_config(hyperparameters, scaling_config)
-
-        trainer = TorchTrainer(
-            train_func, 
-            scaling_config=scaling_config, 
-            datasets={"train": train_dataset, "val": val_dataset},
-            train_loop_config=config,
-            run_config=RunConfig(
-                name=config["name"],
-                checkpoint_config=CheckpointConfig(
-                    num_to_keep=2,
-                    checkpoint_score_attribute="eval_f1",
-                    checkpoint_score_order="max",
-                )
+    # Create a TorchTrainer instance
+    trainer = TorchTrainer(
+        train_func, 
+        scaling_config=scaling_config, 
+        datasets={"train": train_dataset, "val": val_dataset},
+        train_loop_config=config,
+        run_config=RunConfig(
+            name=config["name"],
+            checkpoint_config=CheckpointConfig(
+                num_to_keep=2,
+                checkpoint_score_attribute="eval_f1",
+                checkpoint_score_order="max",
             )
         )
-        
-        result = trainer.fit()
-        print("Training completed with result: %s", result)
-        
-    except KeyboardInterrupt:
-        print("Training interrupted by user.")
-    except Exception as e:
-        print("An error occurred: %s", e)
-    finally:
-        if spark is not None:
-            print("Stopping Spark session.")
-            spark.stop()
-        if ray_initialized and ray.is_initialized():
-            print("Shutting down Ray.")
-            ray.shutdown()
-            
-        print("Exiting program.")
-        
+    )
+    
+    # Start the training process
+    result = trainer.fit()  
+      
+    print("Starting test training using TorchTrainer and functions from finetune.py...")
+    result = trainer.fit()
+    print("Test training completed with result:", result)
+    
+    ray.shutdown()
+
 if __name__ == "__main__":
     main()
