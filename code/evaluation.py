@@ -1,15 +1,22 @@
 # evaluation.py
-"""Evaluations:
+"""
+This script does not use Ray and only uses HF and torch.distributed. 
+This is because we use Horovod to distribute the evaluations and
+Horovod seamlessly integrates with torch.distribute.
+
+Evaluations:
 1. Confusion matrix.
 3. Precision, Recall, F1 of pretrained vs Finetuned model
 """
 
 from hadoop_setup import setup_hadoop_classpath
 from load_data import load_and_prepare_dataset
+from finetune import collate_fn
 
 from pyspark.sql import SparkSession
 from transformers import AutoModelForSequenceClassification, AutoTokenizer
 from datasets import Dataset
+from torch.utils.data import DataLoader
 
 import pyspark.pandas as ps
 import ray.data as rd
@@ -22,15 +29,21 @@ PRETRAINED_MODEL_NAME = "cardiffnlp/twitter-roberta-base-sentiment"
 FINETUNED_MODEL_NAME = "zayanhugsAI/twitter_roberta_finetuned_2"
 
 
-def comparison(model1, model2, dataset: Dataset, metric=['f1'], tokenizer):
+def comparison(model1, model2, dataset: Dataset, tokenizer, batch_size=16, metric=['f1']):
     """Compare model1 and model2 on a dataset"""
     
     # Horovod init
     hvd.init()
     torch.cuda.set_device(hvd.local_rank())
     
+    # Shard dataset per rank
     ds = dataset.remove_columns('UID').shard(num_shards=hvd.size(), index=hvd.rank())
-    # TODO
+    
+    # Prepare dataloader with collate func
+    loader = DataLoader(
+        dataset=ds,
+        batch_size=
+    )
     
     
 
