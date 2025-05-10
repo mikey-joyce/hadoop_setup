@@ -101,28 +101,6 @@ def comparison(pretrained_model, finetuned_model, dataset: Dataset, tokenizer, o
     
     return results_pretrained, results_finetuned
 
-def plot_cm(
-    y_true: list[int],
-    y_pred: list[int],
-    labels: list[int] = [0,1,2],
-    normalize: str | None = None,   # "true", "pred", or None
-    title: str = "Confusion Matrix"
-) -> plt.Figure:
-    """
-    Uses sklearn’s ConfusionMatrixDisplay to plot & return the figure.
-    normalize: {None, 'true', 'pred'}
-    """
-    disp = ConfusionMatrixDisplay.from_predictions(
-        y_true,
-        y_pred,
-        display_labels=labels,
-        normalize=normalize,
-        cmap=plt.cm.Blues,
-        colorbar=True
-    )
-    disp.ax_.set_title(title)
-    fig = disp.figure_
-    return fig 
     
 
 def main():
@@ -188,16 +166,5 @@ def main():
     df_pretrained.to_parquet(output_dir + "/pretrained_preds.parquet", index=False)
     df_finetined.to_parquet(output_dir + "/finetuned_preds.parquet", index=False)
     
-    # plot confusion matrix    
-    cm_pretrained = plot_cm(results_pretrained['y_true'], results_pretrained['y_pred'], labels=[0,1,2], title="Pretrained model CM")
-    cm_finetuned = plot_cm(results_finetuned['y_true'], results_finetuned['y_pred'], labels=[0,1,2], title="finetuned model CM")
-    
-    # Save confusion matrix
-    cm_pretrained.savefig(output_dir + "/pretrained.png")
-    cm_finetuned.savefig(output_dir + "/finetuned.png")
-    
-    plt.close(cm_pretrained)
-    plt.close(cm_finetuned)
-
 if __name__ == "__main__":
     main()
