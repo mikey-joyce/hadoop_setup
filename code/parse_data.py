@@ -208,7 +208,7 @@ def main():
     test['UID'] = test.index.map(lambda i: f"test{i}")
 
     save_dir = '../results/data_distributions/'
-    sentiment_counts = train['sentiment'].value_counts()
+    sentiment_counts = train['sentiment'].astype(int).value_counts()
     sentiment_counts_pd = sentiment_counts.to_pandas()
 
     plt.figure(figsize=(6, 6))
@@ -218,7 +218,7 @@ def main():
     plt.savefig(save_dir + 'train_senti.png')
     plt.close()
 
-    sentiment_counts = valid_labels['sentiment'].value_counts()
+    sentiment_counts = valid_labels['sentiment'].astype(int).value_counts()
     sentiment_counts_pd = sentiment_counts.to_pandas()
 
     plt.figure(figsize=(6, 6))
