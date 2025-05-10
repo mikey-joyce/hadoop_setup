@@ -189,8 +189,8 @@ def main():
     df_finetined.to_parquet(output_dir + "/finetuned_preds.parquet", index=False)
     
     # plot confusion matrix    
-    cm_pretrained = plot_cm(results_pretrained['y_true'], results_pretrained['y_red'], labels=[0,1,2], title="Pretrained model CM")
-    cm_finetuned = plot_cm(results_finetuned['y_true'], results_finetuned['y_red'], labels=[0,1,2], title="finetuned model CM")
+    cm_pretrained = plot_cm(results_pretrained['y_true'], results_pretrained['y_pred'], labels=[0,1,2], title="Pretrained model CM")
+    cm_finetuned = plot_cm(results_finetuned['y_true'], results_finetuned['y_pred'], labels=[0,1,2], title="finetuned model CM")
     
     # Save confusion matrix
     cm_pretrained.savefig(output_dir + "/pretrained.png")
