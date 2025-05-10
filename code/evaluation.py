@@ -105,7 +105,7 @@ def plot_cm(cm_output, title: str = "Confusion Matrix") -> plt.Figure:
     cm_output: {"confusion_matrix": List[List[int]], "labels": List[int]}
     """
     cm = cm_output["confusion_matrix"]
-    labels = cm_output["labels"]
+    labels = cm_output.get('labels', list(range(len(cm))))
     fig, ax = plt.subplots()
     im = ax.imshow(cm, cmap=plt.cm.Blues)
     ax.set_xticks(range(len(labels))); ax.set_xticklabels(labels)
