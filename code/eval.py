@@ -89,7 +89,7 @@ def eval_model(model: PreTrainedModel, tokenizer: PreTrainedTokenizer, dataset: 
     
     # Compute metrics
     print("Computing metrics")
-    precision, recall, f1 = precision_recall_fscore_support(y_true, y_pred, average='weighted')
+    precision, recall, f1, _ = precision_recall_fscore_support(y_true, y_pred, average='weighted')
     
     return {
         "y_pred": y_pred,
