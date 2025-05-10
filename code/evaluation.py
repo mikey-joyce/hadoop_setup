@@ -9,6 +9,7 @@ Evaluations:
 
 from finetune import collate_fn
 from eval import eval_model
+from hadoop_setup import setup_hadoop_classpath
 
 from transformers import AutoModelForSequenceClassification, AutoTokenizer
 from datasets import Dataset, load_dataset
@@ -90,18 +91,21 @@ def plot_cm(cm_output, title: str = "Confusion Matrix") -> plt.Figure:
     
 
 def main():
-        
+    print("Running evaluation script.")
+    
+    setup_hadoop_classpath()
+    
     # Set num of workers
     num_workers = get_num_workers()
     
     # Load dataset
-    hdfs_path = "/phase2/data"
+    hdfs_path = "hdfs:///phase2/data"
     val_path = hdfs_path + "/valid_labels"
-    
+    print(f"Using data from {val_path} to evaluate.")
     try:
         validation_datasetdict = load_dataset(
             "parquet",
-            data_files={"valid_labels": val_path}
+            data_files={"valid_labels": f"{val_path}/*.parquet"}
         )
         validation_data = validation_datasetdict['valid_labels']
     except Exception as e:
