@@ -62,7 +62,8 @@ def eval_model(model: PreTrainedModel, tokenizer: PreTrainedTokenizer, dataset: 
             dataloader_num_workers=num_workers,
             do_train=False,
             do_eval=True,
-            logging_strategy="no"
+            logging_strategy="no",
+            remove_unused_columns=False
         )
     except Exception as e:
         print("Couldn't get trainer arguments")
