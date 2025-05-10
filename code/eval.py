@@ -75,7 +75,7 @@ def eval_model(model: PreTrainedModel, tokenizer: PreTrainedTokenizer, dataset: 
             model=model,
             args=args,
             eval_dataset=dataset,
-            data_collator=partial(collate_fn, tokenizer),
+            data_collator=partial(collate_fn, tokenizer=tokenizer),
         )
     except Exception as e:
         print("Couldn't instantiate trainer")
