@@ -1,6 +1,19 @@
 import numpy as np
 import evaluate
 import ray.data as rd
+import torch
+
+from torch.utils.data import DataLoader
+from transformers import (
+    AutoModelForSequenceClassification as amsc,
+    AutoTokenizer,
+    Trainer,
+    TrainingArguments
+)
+from sklearn.metrics import precision_recall_fscore_support
+
+from functools import partial
+from typing import Union
 
 
 def compute_metric(eval_pred, metric="f1") -> dict[str, int]:
@@ -36,4 +49,50 @@ def count_unique_labels(dataset: rd.Dataset, label_column="sentiment"):
     unique_labels = set()
     for batch in dataset.iter_batches(batch_size=1000):
         unique_labels.update(batch[label_column])
-    return len(unique_labels), unique_labels
+    return len(unique_labels), unique_labels            
+    
+    
+def eval_model(model, tokenizer, dataset, batch_size, output_dir, num_workers, collate_fn) -> dict[str, Union[float, list[float]]]:
+    print("Getting trainer arguments")
+    try:
+        args = TrainingArguments(
+            output_dir=output_dir,
+            per_device_eval_batch_size=batch_size,
+            dataloader_num_workers=num_workers,
+            do_train=False,
+            do_eval=True,
+            logging_strategy="no"
+        )
+    except Exception as e:
+        print("Couldn't get trainer arguments")
+        print(e)
+    
+    print("Instatiating trainer")
+    try:
+        trainer = Trainer(
+            model=model,
+            args=args,
+            eval_dataset=dataset,
+            data_collator=partial(collate_fn, tokenizer),
+        )
+    except Exception as e:
+        print("Couldn't instantiate trainer")
+        print(e)
+    
+    # Get predictions
+    print("Getting predictions")
+    outputs = trainer.predict(dataset)
+    y_pred = outputs.predictions.argmax(-1)
+    y_true = outputs.label_ids
+    
+    # Compute metrics
+    print("Computing metrics")
+    precision, recall, f1 = precision_recall_fscore_support(y_true, y_pred, average='weighted')
+    
+    return {
+        "y_pred": y_pred,
+        "y_true": y_true,
+        "precision": precision,
+        "recall": recall,
+        "f1": f1 
+    }
