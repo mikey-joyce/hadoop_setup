@@ -12,7 +12,7 @@ from eval import eval_model
 from hadoop_setup import setup_hadoop_classpath
 
 from transformers import AutoModelForSequenceClassification, AutoTokenizer
-from datasets import Dataset, load_dataset
+from datasets import Dataset, load_dataset, logging
 
 import torch
 import multiprocessing as mp
@@ -20,6 +20,7 @@ import evaluate
 import matplotlib.pyplot as plt
 import os
 
+logging.disable_progress_bar()
 PRETRAINED_MODEL_NAME = "cardiffnlp/twitter-roberta-base-sentiment"
 FINETUNED_MODEL_NAME = "zayanhugsAI/twitter_roberta_finetuned_2"
 
