@@ -169,8 +169,8 @@ def main():
     
     # plot confusion matrix
     cm_metric = evaluate.load("confusion_matrix")   
-    cm_results_pretrained = cm_metric.compute(predictions=results_pretrained['y_pred'], references=results_pretrained['y_true'])
-    cm_results_finetuned= cm_metric.compute(predictions=results_finetuned['y_pred'], references=results_finetuned['y_true'])
+    cm_results_pretrained = cm_metric.compute(predictions=results_pretrained['y_pred'], references=results_pretrained['y_true'], labels=[0,1,2])
+    cm_results_finetuned= cm_metric.compute(predictions=results_finetuned['y_pred'], references=results_finetuned['y_true'], labels=[0,1,2])
     
     cm_pretrained = plot_cm(cm_results_pretrained, "Pretrained model CM")
     cm_finetuned = plot_cm(cm_results_finetuned, "Finetuned model CM")
