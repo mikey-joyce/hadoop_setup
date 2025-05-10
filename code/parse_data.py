@@ -1,6 +1,7 @@
 from pyspark.sql import SparkSession
 import pyspark.pandas as ps
 import time
+import matplotlib.pyplot as plt
 
 def delete_empty_files(spark, directory, file_extension):
     """
@@ -205,6 +206,27 @@ def main():
 
     test = test.reset_index(drop=True)
     test['UID'] = test.index.map(lambda i: f"test{i}")
+
+    save_dir = '../results/data_distributions/'
+    sentiment_counts = train['sentiment'].astype(int).value_counts()
+    sentiment_counts_pd = sentiment_counts.to_pandas()
+
+    plt.figure(figsize=(6, 6))
+    sentiment_counts_pd.plot.pie(autopct='%1.1f%%', startangle=90)
+    plt.title('Train Sentiment Distribution')
+    plt.ylabel('')
+    plt.savefig(save_dir + 'train_senti.png')
+    plt.close()
+
+    sentiment_counts = valid_labels['sentiment'].astype(int).value_counts()
+    sentiment_counts_pd = sentiment_counts.to_pandas()
+
+    plt.figure(figsize=(6, 6))
+    sentiment_counts_pd.plot.pie(autopct='%1.1f%%', startangle=90)
+    plt.title('Valid_labels Sentiment Distribution')
+    plt.ylabel('')
+    plt.savefig(save_dir + 'valid_labels_senti.png')
+    plt.close()
 
     # convert pandas dataframes to spark dataframes and save them as Parquet files
     sdfs = [
