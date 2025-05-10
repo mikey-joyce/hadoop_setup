@@ -7,7 +7,6 @@ Evaluations:
 3. Precision, Recall, F1 of pretrained vs Finetuned model
 """
 
-from finetune import collate_fn
 from eval import eval_model
 from hadoop_setup import setup_hadoop_classpath
 
@@ -44,6 +43,36 @@ def get_num_workers(reserve_cores=1):
           f"num_workers per rank: {num_workers}")
     
     return num_workers
+
+def collate_fn(
+    batch: list[dict],
+    tokenizer,
+    max_length: int = 512
+) -> dict:
+    """
+    batch: List of examples, each a dict with keys 'content' and 'sentiment'.
+    tokenizer: HuggingFace tokenizer.
+    """
+    # 1) Extract lists of texts and labels
+    texts  = [example["content"]   for example in batch]
+    labels = [example["sentiment"] for example in batch]
+
+    # 2) Tokenize the texts
+    outputs = tokenizer(
+        texts,
+        truncation=True,
+        padding="longest",
+        max_length=max_length,
+        return_tensors="pt"
+    )
+
+    # 3) Convert labels to longs
+    outputs["labels"] = torch.tensor(
+        [int(float(lbl)) for lbl in labels], 
+        dtype=torch.long
+    )
+
+    return outputs
 
 def comparison(pretrained_model, finetuned_model, dataset: Dataset, tokenizer, output_dir, collate_fn, batch_size=16, num_workers=1):
     """Compare model1 and model2 on a dataset"""
