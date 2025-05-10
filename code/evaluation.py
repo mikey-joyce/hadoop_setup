@@ -126,7 +126,7 @@ def main():
     
     # Compare
     output_dir = "/home/ubuntu/hadoop_setup/comparison_results"
-    os.makedirs(output_dir)
+    os.makedirs(output_dir, exist_ok=True)
     results_pretrained, results_finetuned = comparison(
         pretrained_model=pretrained_model,
         finetuned_model=finetuned_model,
