@@ -1,32 +1,23 @@
 # evaluation.py
 """
 This script does not use Ray and only uses HF and torch.distributed. 
-This is because we use Horovod to distribute the evaluations and
-Horovod seamlessly integrates with torch.distribute.
 
 Evaluations:
 1. Confusion matrix.
 3. Precision, Recall, F1 of pretrained vs Finetuned model
 """
 
-from hadoop_setup import setup_hadoop_classpath
-from load_data import load_and_prepare_dataset
 from finetune import collate_fn
 from eval import eval_model
 
-from pyspark.sql import SparkSession
 from transformers import AutoModelForSequenceClassification, AutoTokenizer
-from datasets import Dataset
-from torch.utils.data import DataLoader
+from datasets import Dataset, load_dataset
 
-import pyspark.pandas as ps
-import ray.data as rd
-import horovod.torch as hvd
 import torch
-
-import datetime
 import multiprocessing as mp
-from functools import partial
+import evaluate
+import matplotlib.pyplot as plt
+import os
 
 PRETRAINED_MODEL_NAME = "cardiffnlp/twitter-roberta-base-sentiment"
 FINETUNED_MODEL_NAME = "zayanhugsAI/twitter_roberta_finetuned_2"
@@ -52,88 +43,110 @@ def get_num_workers(reserve_cores=1):
     
     return num_workers
 
-def comparison(model1, model2, dataset: Dataset, tokenizer, batch_size=16, metrics=['f1'], num_workers=1):
+def comparison(pretrained_model, finetuned_model, dataset: Dataset, tokenizer, output_dir, collate_fn, batch_size=16, num_workers=1):
     """Compare model1 and model2 on a dataset"""
     
-    # Horovod init
-    try:
-        print("Initializing Horovod")
-        hvd.init()
-    except Exception as e:
-        print("Couldn't initialize Horovd. Exception:")
-        print(e)
+    results_pretrained = eval_model(
+        model=pretrained_model,
+        tokenizer=tokenizer,
+        dataset=dataset,
+        batch_size=batch_size,
+        output_dir=output_dir + "/pretrained",
+        num_workers=num_workers,
+        collate_fn=collate_fn
+    )
     
-    device = torch.device(f"cuda:{hvd.local_rank()}" if torch.cuda.is_available() else "cpu")    
-    torch.cuda.set_device(device)
+    results_finetuned = eval_model(
+        model=finetuned_model,
+        tokenizer=tokenizer,
+        dataset=dataset,
+        batch_size=batch_size,
+        output_dir=output_dir + "/finetuned",
+        num_workers=num_workers,
+        collate_fn=collate_fn
+    )
     
-    # Shard dataset per rank
-    print("Getting data shard")
-    try:
-        ds = dataset.remove_columns('UID').shard(num_shards=hvd.size(), index=hvd.rank())
-    except Exception as e:
-        print("Couldn't load data shard.")
-        print(e)
+    return results_pretrained, results_finetuned
+
+def plot_cm(cm_output, title: str = "Confusion Matrix") -> plt.Figure:
+    """
+    Plots an N×N confusion matrix from HF Evaluate's output.
+    cm_output: {"confusion_matrix": List[List[int]], "labels": List[int]}
+    """
+    cm = cm_output["confusion_matrix"]
+    labels = cm_output["labels"]
+    fig, ax = plt.subplots()
+    im = ax.imshow(cm, cmap=plt.cm.Blues)
+    ax.set_xticks(range(len(labels))); ax.set_xticklabels(labels)
+    ax.set_yticks(range(len(labels))); ax.set_yticklabels(labels)
+    ax.set_xlabel("Predicted"); ax.set_ylabel("True")
+    ax.set_title(title)
+    for i in range(len(labels)):
+        for j in range(len(labels)):
+            ax.text(j, i, cm[i][j], ha="center", va="center")
+    fig.colorbar(im, ax=ax)
     
-    try:
-        print("Creating data loader")
-        # Prepare dataloader with collate func
-        loader = DataLoader(
-            dataset=ds,
-            batch_size=batch_size,
-            shuffle=False,
-            num_workers=num_workers,
-            collate_fn=partial(collate_fn, tokenizer)
-        )
-    except Exception as e:
-        print("Couldn't instantiate data loader.")
-        print(e)
-    
-    model1_scores = eval_model(model1, loader, metrics, device)
-    model2_scores = eval_model(model2, loader, metrics, device)
-    
-    return model1_scores, model2_scores
+    return fig    
     
 
 def main():
-    spark = None
+        
+    # Set num of workers
+    num_workers = get_num_workers()
+    
+    # Load dataset
+    hdfs_path = "/phase2/data"
+    val_path = hdfs_path + "/valid_labels"
     
     try:
-        setup_hadoop_classpath()
-        spark = SparkSession.builder.appName("Evaluation").getOrCreate()
-        
-        # Set num of workers
-        num_workers = get_num_workers()
-        
-        # Load dataset
-        hdfs_path = "/phase2/data"
-        val_path = hdfs_path + "/valid_labels"
-        
-        try:
-            test_data = load_and_prepare_dataset(spark, val_path)
-        except:
-            print("Couldn't load test data using spark.")
-            
-        print("Loaded test data.")
-        
-        # Load models and tokenizer
-        pretrained_model = AutoModelForSequenceClassification.from_pretrained(PRETRAINED_MODEL_NAME)
-        finetuned_model = AutoModelForSequenceClassification.from_pretrained(FINETUNED_MODEL_NAME)
-        tokenizer = AutoTokenizer.from_pretrained(PRETRAINED_MODEL_NAME, use_fast=True)
-
-        print("Loaded models and tokenizer")
-        
-    except KeyboardInterrupt:
-        print("Evaluation interrupted by user.")
+        validation_datasetdict = load_dataset(
+            "parquet",
+            data_files={"valid_labels": val_path}
+        )
+        validation_data = validation_datasetdict['valid_labels']
     except Exception as e:
-        print("An error occured: ", e)
-    finally:
-        if spark is not None:
-            print("Stopping spark session")
-            spark.stop()
-            
-        print("Exiting program.")
+        raise RuntimeError(f"Failed to load dataset from {val_path}") from e
         
-        
+    print("Loaded test data.")
+    
+    # Remove "UID column"
+    validation_data = validation_data.remove_columns("UID")
+    
+    # Load models and tokenizer
+    pretrained_model = AutoModelForSequenceClassification.from_pretrained(PRETRAINED_MODEL_NAME)
+    finetuned_model = AutoModelForSequenceClassification.from_pretrained(FINETUNED_MODEL_NAME)
+    tokenizer = AutoTokenizer.from_pretrained(PRETRAINED_MODEL_NAME, use_fast=True)
+
+    print("Loaded models and tokenizer")
+    
+    # Compare
+    output_dir = "/home/ubuntu/hadoop_setup/comparison_results"
+    os.makedirs(output_dir)
+    results_pretrained, results_finetuned = comparison(
+        pretrained_model=pretrained_model,
+        finetuned_model=finetuned_model,
+        dataset=validation_data,
+        tokenizer=tokenizer,
+        output_dir=output_dir,
+        collate_fn=collate_fn,
+        num_workers=num_workers,
+        batch_size=64
+    )
+    
+    # plot confusion matrix
+    cm_metric = evaluate.load("confusion_matrix")   
+    cm_results_pretrained = cm_metric.compute(predictions=results_pretrained['y_pred'], references=results_pretrained['y_true'])
+    cm_results_finetuned= cm_metric.compute(predictions=results_finetuned['y_pred'], references=results_finetuned['y_true'])
+    
+    cm_pretrained = plot_cm(cm_results_pretrained, "Pretrained model CM")
+    cm_finetuned = plot_cm(cm_results_finetuned, "Finetuned model CM")
+    
+    # Save confusion matrix
+    cm_pretrained.savefig(output_dir + "/pretrained.png")
+    cm_finetuned.savefig(output_dir + "/finetuned.png")
+    
+    plt.close(cm_pretrained)
+    plt.close(cm_finetuned)
 
 if __name__ == "__main__":
     main()

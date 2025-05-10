@@ -5,12 +5,13 @@ import torch
 
 from torch.utils.data import DataLoader
 from transformers import (
-    AutoModelForSequenceClassification as amsc,
-    AutoTokenizer,
+    PreTrainedModel,
+    PreTrainedTokenizer,
     Trainer,
     TrainingArguments
 )
 from sklearn.metrics import precision_recall_fscore_support
+from datasets import Dataset
 
 from functools import partial
 from typing import Union
@@ -52,7 +53,7 @@ def count_unique_labels(dataset: rd.Dataset, label_column="sentiment"):
     return len(unique_labels), unique_labels            
     
     
-def eval_model(model, tokenizer, dataset, batch_size, output_dir, num_workers, collate_fn) -> dict[str, Union[float, list[float]]]:
+def eval_model(model: PreTrainedModel, tokenizer: PreTrainedTokenizer, dataset: Dataset, batch_size, output_dir, num_workers, collate_fn) -> dict[str, Union[float, list[float]]]:
     print("Getting trainer arguments")
     try:
         args = TrainingArguments(
