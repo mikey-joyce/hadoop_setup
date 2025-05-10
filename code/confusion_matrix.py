@@ -29,7 +29,8 @@ def plot_cm(
 if __name__ == "__main__":
     # load predictions
     predictions_path = "/home/ubuntu/hadoop_setup/comparison_results"
-    os.path.exists(predictions_path)
+    if not os.path.isdir(predictions_path):
+        raise FileNotFoundError(f"No such directory {predictions_path}")
     
     df_pretrained = pd.read_parquet(os.path.join(predictions_path, "pretrained_preds.parquet"))
     df_finetuned = pd.read_parquet(os.path.join(predictions_path, "finetuned_preds.parquet"))
