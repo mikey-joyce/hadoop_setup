@@ -3,6 +3,7 @@ import pandas as pd
 from sklearn.metrics import precision_recall_fscore_support
 from typing import List, Optional
 import numpy as np
+import plotly.express as px
 
 def metrics_comparison_table(
     y_true_list: List[List[int]],
@@ -110,6 +111,45 @@ def metrics_comparison_table_enhanced(
 
     return pd.DataFrame(rows)
 
+def plot_metrics_radar_px(
+    y_true_list: List[List[int]],
+    y_pred_list: List[List[int]],
+    model_names: List[str],
+    title: str = "Model Comparison Radar"
+) -> None:
+    """
+    Uses Plotly Express to draw a radar plot of macro-precision, recall, and F1.
+    """
+    assert len(y_true_list) == len(y_pred_list) == len(model_names) == 2, \
+        "This function supports exactly 2 models."
+
+    metrics = ["precision", "recall", "f1"]
+    records = []
+
+    # compute macro metrics for each model
+    for name, y_true, y_pred in zip(model_names, y_true_list, y_pred_list):
+        p, r, f1, _ = precision_recall_fscore_support(
+            y_true, y_pred, average="macro", zero_division=0
+        )
+        values = [p, r, f1]
+        for m, v in zip(metrics, values):
+            records.append({"model": name, "metric": m.capitalize(), "score": v})
+
+    df = pd.DataFrame(records)
+
+    fig = px.line_polar(
+        df,
+        r="score",
+        theta="metric",
+        color="model",
+        line_close=True,
+        title=title,
+        template="plotly_white"
+    )
+    fig.update_traces(fill="toself")
+    
+    return fig
+
 if __name__ == "__main__":
     # load predictions
     predictions_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'comparison_results')
@@ -135,7 +175,7 @@ if __name__ == "__main__":
     
     # save
     save_path = os.path.join(predictions_path, "results.csv")
-    df1.to_csv(save_path, index=False)
+    df1.to_csv(save_path)
     
     df2 = metrics_comparison_table_enhanced(
         y_true_list=[y_true_pre, y_true_fine],
@@ -145,7 +185,7 @@ if __name__ == "__main__":
     
     # save as csv
     save_path = os.path.join(predictions_path, "results_enhanced.csv")
-    df2.to_csv(save_path, index=False)
+    df2.to_csv(save_path)
     
     # save to latex
     latex_str = df2.to_latex(
@@ -162,3 +202,14 @@ if __name__ == "__main__":
         f.write(latex_str)
     
     print(f"Saved latex table to {latex_file_path}")
+    
+    fig_radar = plot_metrics_radar_px(
+        y_true_list=[y_true_pre, y_true_fine],
+        y_pred_list=[y_pred_pre, y_pred_fine],
+        model_names=model_names,
+        title="Pretrained vs FineTuned - Macro metrics"
+    )
+    
+    save_path = os.path.join(predictions_path, 'comparison_radar.png')
+    fig_radar.write_image(save_path, width=600, height=600)
+    
